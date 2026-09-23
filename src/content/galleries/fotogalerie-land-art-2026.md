@@ -29,6 +29,5 @@ categories:
 article: land-art-ve-svobodnych-hermanicich-1.md
 seo:
   title: Land Art Svobodné Heřmanice
-  canonical: land-art-2026
   noindex: false
 ---
