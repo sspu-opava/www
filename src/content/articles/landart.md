@@ -22,7 +22,6 @@ seo:
   title: Land Art Svobodné Heřmanice
   description: "Pro žáky třetího a čtvrtého ročníku oboru tvorba hraček a herních
     předmětů je již neodmyslitelně spjat s pobytem v přírodě. "
-  canonical: land-art-2026
   noindex: false
 gallery: land-art-ve-svobodnych-hermanicich-1-galerie.md
 related:
