@@ -24,4 +24,9 @@ seo:
     předmětů je již neodmyslitelně spjat s pobytem v přírodě. "
   canonical: land-art-2026
   noindex: false
+gallery: land-art-ve-svobodnych-hermanicich-1-galerie.md
+related:
+  - vernisaz-vystavy-hravek.md
+  - vernisaz-ve-slezskem-divadle-v-opave.md
+  - vystava-oboru-design-hracek-ve-slezskem-divadle.md
 ---
