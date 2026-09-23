@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import PageHero from '../../../../components/content/PageHero.astro';
+import JobOfferCard from '../../../../components/jobs/JobOfferCard.astro';
+import { entries } from '../../../../lib/content';
+import { sortJobOffers } from '../../../../lib/jobOffers';
+import { heroImages } from '../../../../data/heroImages';
+
+const offers = (await entries('jobOffers')).sort(sortJobOffers);
+---
+
+<BaseLayout
+  title="Nabídky zaměstnání"
+  description="Aktuální pracovní nabídky, brigády, stáže a praxe pro studenty, absolventy i veřejnost."
+  schema={{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Nabídky zaměstnání a brigád', description: 'Přehled pracovních nabídek, brigád, stáží a praxí.' }}
+>
+  <PageHero eyebrow="Studenti" title="Nabídky zaměstnání" description="Příležitosti od firem, se kterými škola spolupracuje nebo které hledají technicky a umělecky zaměřené studenty a absolventy." accent="#59BDDC" icon={heroImages.jobs} />
+
+  <section class="container-page pb-16 sm:pb-20" data-pagefind-body>
+    <span class="sr-only" data-pagefind-filter="typ">Nabídky zaměstnání</span>
+    {offers.length > 0 ? <div class="job-offer-grid">{offers.map((offer) => <JobOfferCard offer={offer} />)}</div> : <p class="job-offer-empty">Momentálně nejsou evidovány žádné nabídky.</p>}
+  </section>
+</BaseLayout>

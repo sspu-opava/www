@@ -1,0 +1,103 @@
+---
+import type { PersonEntry } from '../../lib/people';
+import { formatPersonName, getPersonPhoto, getPersonPosition, getPersonWorkplace } from '../../lib/people';
+import { withBase } from '../../lib/content';
+import ContentRenderer from '../content/ContentRenderer.astro';
+import PersonMeta from './PersonMeta.astro';
+
+const { person } = Astro.props as { person: PersonEntry };
+const data = person.data;
+const state = Astro.locals as { personDialogIds?: Set<string> };
+const renderedIds = state.personDialogIds ??= new Set();
+const showDialog = !renderedIds.has(person.id);
+renderedIds.add(person.id);
+const dialogId = `person-dialog-${person.id}`;
+const name = formatPersonName(data);
+const position = getPersonPosition(data);
+const workplace = getPersonWorkplace(data);
+const photo = getPersonPhoto(data);
+const hasProfile = data.contentBlocks.length > 0 || Boolean(data.profile?.trim());
+---
+
+{showDialog && <dialog id={dialogId} class="person-dialog" data-person-dialog data-person-dialog-id={person.id} data-pagefind-ignore aria-labelledby={`${dialogId}-title`}>
+  <div class="person-dialog-shell">
+    <form method="dialog" class="person-dialog-close-form">
+      <button type="submit" class="person-dialog-close" aria-label="Zavřít profil osoby">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+      </button>
+    </form>
+    <div class="person-dialog-header">
+      {photo && <div class="person-dialog-photo"><img src={withBase(photo.src)} alt={photo.alt} style={photo.focalPoint ? `object-position:${photo.focalPoint}` : undefined} /></div>}
+      <div class="person-dialog-heading">
+        {workplace && <p class="person-dialog-workplace">{workplace}</p>}
+        <h2 id={`${dialogId}-title`}>{name}</h2>
+        <p class="person-dialog-position">{position}</p>
+      </div>
+    </div>
+    <div class="person-dialog-contact-row">
+      <PersonMeta person={person} showWorkplace={false} showPhone compact />
+    </div>
+    {hasProfile && <div class="person-dialog-body">
+      <ContentRenderer blocks={data.contentBlocks}>
+        <p class="whitespace-pre-line">{data.profile}</p>
+      </ContentRenderer>
+    </div>}
+  </div>
+</dialog>}
+
+<script>
+  const dialogs = [...document.querySelectorAll<HTMLDialogElement>('[data-person-dialog]')];
+  const dialogById = new Map(dialogs.map((dialog) => [dialog.dataset.personDialogId, dialog]));
+  let lastTrigger: HTMLElement | null = null;
+
+  const setPersonUrl = (id: string | null) => {
+    const url = new URL(window.location.href);
+    if (id) url.searchParams.set('osoba', id);
+    else url.searchParams.delete('osoba');
+    window.history.replaceState({}, '', url);
+  };
+
+  const openDialog = (id: string, trigger?: HTMLElement | null, updateUrl = true) => {
+    const dialog = dialogById.get(id);
+    if (!dialog) return false;
+    if (!dialog.open) dialog.showModal();
+    lastTrigger = trigger ?? null;
+    document.body.classList.add('person-dialog-open');
+    if (updateUrl) setPersonUrl(id);
+    return true;
+  };
+
+  document.addEventListener('click', (event) => {
+    if (event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    const target = event.target;
+    const trigger = target instanceof Element ? target.closest<HTMLElement>('[data-person-open]') : null;
+    if (!trigger) return;
+    if (target instanceof Element && target.closest('a[href^="mailto:"], a[href^="tel:"], a.person-field-tag')) return;
+    const id = trigger.dataset.personOpen;
+    if (!id || !openDialog(id, target instanceof Element ? target.closest<HTMLElement>('a, button') ?? trigger : trigger)) return;
+    event.preventDefault();
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    const target = event.target;
+    const trigger = target instanceof Element ? target.closest<HTMLElement>('[data-person-open]') : null;
+    if (!trigger || target instanceof HTMLAnchorElement || target instanceof HTMLButtonElement) return;
+    const id = trigger.dataset.personOpen;
+    if (!id || !openDialog(id, trigger)) return;
+    event.preventDefault();
+  });
+
+  dialogs.forEach((dialog) => {
+    dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
+    dialog.addEventListener('close', () => {
+      document.body.classList.remove('person-dialog-open');
+      setPersonUrl(null);
+      lastTrigger?.focus();
+      lastTrigger = null;
+    });
+  });
+
+  const initialPerson = new URL(window.location.href).searchParams.get('osoba');
+  if (initialPerson) openDialog(initialPerson, null, false);
+</script>

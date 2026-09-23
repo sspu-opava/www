@@ -1,0 +1,21 @@
+---
+// Explicit Astro route makes /admin/ work in both development and production.
+---
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Redakce SŠPU Opava</title>
+  </head>
+  <body data-pagefind-ignore>
+    <main id="cms-loading" aria-live="polite">Načítám redakční systém…</main>
+    <script>
+      import CMS from 'decap-cms-app';
+
+      CMS.init();
+      document.querySelector('#cms-loading')?.remove();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,28 @@
+---
+import type { ProjectEntry } from '../../lib/projects';
+import { projectPeriod, projectStatusClass, projectStatusLabel } from '../../lib/projects';
+
+interface Props {
+  project: ProjectEntry;
+  compact?: boolean;
+}
+
+const { project, compact = false } = Astro.props as Props;
+const data = project.data;
+---
+
+<dl class:list={['project-meta', compact && 'project-meta-compact']}>
+  <div>
+    <dt>Stav</dt>
+    <dd><span class:list={['project-status', projectStatusClass(data.status)]}>{projectStatusLabel(data.status)}</span></dd>
+  </div>
+  <div>
+    <dt>Období</dt>
+    <dd>{projectPeriod(data)}</dd>
+  </div>
+  {data.programme && <div><dt>Program</dt><dd>{data.programme}</dd></div>}
+  {!compact && data.call && <div><dt>Výzva</dt><dd>{data.call}</dd></div>}
+  {!compact && data.registrationNumber && <div><dt>Registrační číslo</dt><dd>{data.registrationNumber}</dd></div>}
+  {!compact && data.projectNumber && <div><dt>Číslo projektu</dt><dd>{data.projectNumber}</dd></div>}
+  {!compact && data.funding && <div><dt>Financování</dt><dd>{data.funding}</dd></div>}
+</dl>

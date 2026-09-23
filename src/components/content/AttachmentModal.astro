@@ -1,0 +1,86 @@
+---
+---
+
+<dialog class="attachment-dialog" data-attachment-dialog data-pagefind-ignore aria-labelledby="attachment-dialog-title">
+  <div class="attachment-dialog-shell">
+    <form method="dialog" class="attachment-dialog-close-form">
+      <button type="submit" class="attachment-dialog-close" data-attachment-dialog-close aria-label="Zavřít náhled přílohy">×</button>
+    </form>
+    <header class="attachment-dialog-header">
+      <p class="eyebrow">Příloha</p>
+      <h2 id="attachment-dialog-title" class="mt-2 text-2xl" data-attachment-dialog-title>Dokument</h2>
+      <p class="mt-2 text-sm leading-6 text-ink/70" data-attachment-dialog-description hidden></p>
+    </header>
+    <div class="attachment-dialog-preview">
+      <iframe title="Náhled přílohy" data-attachment-frame hidden></iframe>
+      <img alt="" data-attachment-image hidden />
+      <p class="attachment-dialog-empty" data-attachment-empty hidden>Náhled tohoto typu souboru není k dispozici. Soubor můžete stáhnout pomocí tlačítka níže.</p>
+    </div>
+    <footer class="attachment-dialog-footer">
+      <a class="button-primary" data-attachment-download target="_blank" rel="noopener">Stáhnout soubor <span aria-hidden="true" class="ml-2">↓</span></a>
+    </footer>
+  </div>
+</dialog>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('[data-attachment-dialog]');
+  const title = dialog?.querySelector<HTMLElement>('[data-attachment-dialog-title]');
+  const description = dialog?.querySelector<HTMLElement>('[data-attachment-dialog-description]');
+  const frame = dialog?.querySelector<HTMLIFrameElement>('[data-attachment-frame]');
+  const image = dialog?.querySelector<HTMLImageElement>('[data-attachment-image]');
+  const empty = dialog?.querySelector<HTMLElement>('[data-attachment-empty]');
+  const download = dialog?.querySelector<HTMLAnchorElement>('[data-attachment-download]');
+  let lastTrigger: HTMLElement | null = null;
+
+  const resetPreview = () => {
+    if (frame) { frame.hidden = true; frame.src = 'about:blank'; }
+    if (image) { image.hidden = true; image.removeAttribute('src'); }
+    if (empty) empty.hidden = true;
+  };
+
+  const openAttachment = (trigger: HTMLElement) => {
+    if (!dialog) return;
+    const url = trigger.dataset.attachmentUrl || trigger.getAttribute('href');
+    if (!url) return;
+    const label = trigger.dataset.attachmentLabel || trigger.textContent?.trim() || 'Dokument';
+    const note = trigger.dataset.attachmentDescription;
+    const extension = (trigger.dataset.attachmentExtension || url.split(/[?#]/)[0].split('.').pop() || '').toLowerCase();
+    if (title) title.textContent = label;
+    if (description) { description.textContent = note || ''; description.hidden = !note; }
+    if (download) { download.href = url; download.setAttribute('download', ''); }
+    resetPreview();
+    if (frame && extension === 'pdf') { frame.src = url; frame.hidden = false; }
+    else if (image && /^(?:png|jpe?g|gif|webp|avif|svg)$/.test(extension)) { image.src = url; image.alt = label; image.hidden = false; }
+    else if (empty) empty.hidden = false;
+    lastTrigger = trigger;
+    dialog.showModal();
+    document.body.classList.add('attachment-dialog-open');
+    dialog.querySelector<HTMLElement>('[data-attachment-dialog-close]')?.focus();
+  };
+
+  const isAttachmentHref = (href: string) => {
+    try {
+      const path = new URL(href, window.location.href).pathname.toLowerCase();
+      return path.includes('/uploads/') || path.includes('/media/filer_public/') || /\.(?:pdf|docx?|xlsx?|pptx?|zip|rar|7z|odt|ods|csv)$/i.test(path);
+    } catch {
+      return false;
+    }
+  };
+
+  document.addEventListener('click', (event) => {
+    if (event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    const target = event.target;
+    const explicitTrigger = target instanceof Element ? target.closest<HTMLElement>('[data-attachment-open]') : null;
+    const rawLink = target instanceof Element ? target.closest<HTMLAnchorElement>('a[href]') : null;
+    const href = rawLink?.getAttribute('href');
+    if (rawLink?.hasAttribute('download') || rawLink?.closest('[data-attachment-dialog], [data-gallery]')) return;
+    if (!dialog || (!explicitTrigger && (!rawLink || !href || !isAttachmentHref(href)))) return;
+    const trigger = explicitTrigger ?? rawLink;
+    if (!trigger) return;
+    event.preventDefault();
+    openAttachment(trigger);
+  });
+
+  dialog?.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
+  dialog?.addEventListener('close', () => { document.body.classList.remove('attachment-dialog-open'); resetPreview(); lastTrigger?.focus(); lastTrigger = null; });
+</script>

@@ -1,0 +1,80 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleSection from '../../components/news/ArticleSection.astro';
+import EventSection from '../../components/events/EventSection.astro';
+import ItProgramBody from '../../components/programs/ItProgramBody.astro';
+import ProgramBody from '../../components/programs/ProgramBody.astro';
+import ProgramHero from '../../components/programs/ProgramHero.astro';
+import ProgramHeroMedia from '../../components/programs/ProgramHeroMedia.astro';
+import ProgramLegacyMedia from '../../components/programs/ProgramLegacyMedia.astro';
+import PeopleSection from '../../components/people/PeopleSection.astro';
+import ContentRenderer from '../../components/content/ContentRenderer.astro';
+import SearchMetadata from '../../components/content/SearchMetadata.astro';
+import AttachmentLink from '../../components/content/AttachmentLink.astro';
+import { entries, withBase } from '../../lib/content';
+import { getPersonStudyFields, isPersonVisible } from '../../lib/people';
+
+export async function getStaticPaths() {
+  return (await entries('programs')).map((program) => ({
+    params: { slug: program.id },
+    props: { program }
+  }));
+}
+
+const { program } = Astro.props;
+const { Content } = await render(program);
+const [articles, galleries, people, events, documents] = await Promise.all([entries('articles'), entries('galleries'), entries('people'), entries('events'), entries('documents')]);
+const relatedArticles = articles.filter((article) => article.data.programs.includes(program.id) || article.data.categories.includes(program.data.title)).slice(0, 3);
+const relatedGalleries = galleries.filter((gallery) => gallery.data.programs.includes(program.id) || gallery.data.categories.includes(program.data.title));
+const programVisuals = [
+  ...relatedGalleries.flatMap((gallery) => gallery.data.photos.map((photo) => ({ src: photo.src, alt: photo.alt }))),
+  ...(program.data.heroImage ? [{ src: program.data.heroImage, alt: program.data.title }] : [])
+];
+const advisors = program.data.relatedPeople.length
+  ? program.data.relatedPeople.flatMap(id => people.find(person => person.id === id) ?? [])
+  : people.filter((person) => getPersonStudyFields(person.data).includes(program.id) && isPersonVisible(person.data));
+const accent = program.id === 'strojirenstvi' ? '#1A4053' : program.id === 'informacni-technologie' ? '#59BDDC' : program.id === 'design-hracek' ? '#ECAFAC' : program.id === 'prumyslovy-design' ? '#D0D543' : '#C42079';
+const isItProgram = program.id === 'informacni-technologie';
+const schoolPlanDocument = documents.find((document) => document.data.programs.includes(program.id) && document.id.startsWith('skolni-vzdelavaci-program-'));
+const technicalApplicantDocument = documents.find((document) => document.id === 'informace-pro-uchazece-technicke-obory');
+const artisticApplicantDocument = documents.find((document) => document.id === 'informace-pro-uchazece-umelecke-obory');
+const itHeroCopy = {
+  eyebrow: 'ČTYŘLETÉ DENNÍ STUDIUM S MATURITOU',
+  title: `${program.data.code} ${program.data.title.toUpperCase()}`,
+  subtitle: 'se zaměřením na počítačové sítě a programování',
+  description: program.data.description,
+  capacity: `Přijímáme ${program.data.capacity} žáků`
+};
+const itHeroLinks = [
+  { label: 'Školní vzdělávací plán', href: '/dokumenty/', document: schoolPlanDocument },
+  { label: 'Průběh studia', href: '#obor-content' },
+  { label: 'Přijímací řízení', href: '/uchazeci/' },
+  { label: 'Informace pro uchazeče', href: '/dokumenty/', document: technicalApplicantDocument }
+];
+const programTaglines: Record<string, string> = {
+  strojirenstvi: 'se zaměřením na výpočetní techniku',
+  'prumyslovy-design': 'od nápadu k výrobku',
+  'graficky-design': 'od kresby k vizuální komunikaci',
+  'design-hracek': 'od nápadu k hračce a hernímu objektu'
+};
+const applicantHref = '/dokumenty/';
+const programHeroVideos: Record<string, string> = {
+  strojirenstvi: '/videos/banners/strojirenstvi.mp4',
+  'prumyslovy-design': '/videos/banners/prumyslovy-design.mp4',
+  'graficky-design': '/videos/banners/graficky-design.mp4',
+  'design-hracek': '/videos/banners/design-hracek.mp4',
+  'informacni-technologie': '/videos/banners/informacni-technologie.mp4'
+};
+const heroVideo = programHeroVideos[program.id];
+---
+
+<BaseLayout title={program.data.title} description={program.data.description} seo={program.data.seo} breadcrumbs={[{ label: 'Obory a studium', href: '/obory/' }, { label: program.data.title }]} schema={{ '@context': 'https://schema.org', '@type': 'Course', name: program.data.title, description: program.data.description, provider: { '@type': 'EducationalOrganization', name: 'SŠPU Opava' } }}>
+  <SearchMetadata type="Obor" programs={[program.id]} />
+  {isItProgram ? <section class="container-page pb-10 sm:pb-14"><div class="overflow-hidden rounded-2xl bg-[#59BDDC] shadow-lift"><ProgramHeroMedia accent="#59BDDC" alt={program.data.title} image={program.data.heroImage} video={heroVideo} /><div class="bg-[#59BDDC] px-6 py-8 text-night sm:px-10 sm:py-10 lg:px-14 lg:py-12"><p class="text-xs font-bold uppercase tracking-[0.18em] text-night/70">{itHeroCopy.eyebrow}</p><h1 class="mt-3 text-4xl font-black uppercase tracking-tight text-white sm:text-5xl">{itHeroCopy.title}</h1><p class="mt-3 text-lg font-bold text-white sm:text-2xl">{itHeroCopy.subtitle}</p><p class="mt-4 max-w-4xl text-base leading-7 text-night/80 sm:text-lg">{itHeroCopy.description}</p><p class="mt-6 text-xl font-black text-white sm:text-2xl">{itHeroCopy.capacity}</p><div class="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{itHeroLinks.map((link) => link.document ? <AttachmentLink label={link.label} url={link.document.data.file} description={link.document.data.description} class="flex min-h-14 items-center justify-center rounded-xl border border-white/25 bg-white/20 px-4 py-3 text-center text-sm font-bold text-night no-underline transition hover:-translate-y-0.5 hover:bg-white hover:shadow-soft">{link.label}</AttachmentLink> : <a href={withBase(link.href)} class="flex min-h-14 items-center justify-center rounded-xl border border-white/25 bg-white/20 px-4 py-3 text-center text-sm font-bold text-night no-underline transition hover:-translate-y-0.5 hover:bg-white hover:shadow-soft">{link.label}</a>)}</div></div></div></section> : <ProgramHero program={{ ...program.data, heroVideo }} accent={accent} tagline={programTaglines[program.id]} applicantHref={applicantHref} studyPlanDocument={schoolPlanDocument?.data} applicantDocument={(program.id === 'strojirenstvi' ? technicalApplicantDocument : artisticApplicantDocument)?.data} />}
+  {!isItProgram && <ProgramLegacyMedia programId={program.id} programTitle={program.data.title} />}
+  {program.data.contentBlocks.length > 0 ? <section id="obor-content" class="container-page pb-16"><ContentRenderer blocks={program.data.contentBlocks}><Content /></ContentRenderer></section> : isItProgram ? <ItProgramBody programTitle={program.data.title} /> : <ProgramBody programId={program.id} programTitle={program.data.title} description={program.data.description} careers={program.data.careers} accent={accent} visuals={programVisuals}><Content /></ProgramBody>}
+  {relatedArticles.length > 0 && <ArticleSection articles={relatedArticles} eyebrow="Z oboru" title="Aktuality a projekty" background="mist" />}
+  <EventSection events={events} eyebrow="Z oboru" title="Akce oboru" variant="field" programs={[program.id]} limit={3} from="now" background="paper" />
+  <section id="kontakt-oboru" class="container-page py-16"><div class="grid gap-8 lg:grid-cols-2"><div><p class="eyebrow">Kontakt k oboru</p><h2 class="mt-2">Ptejte se konkrétně.</h2><p class="mt-4 max-w-xl leading-7 text-ink/75">Rádi vám pomůžeme s volbou oboru, přijímacím řízením i návštěvou školy.</p></div><PeopleSection people={advisors} title="Koordinátoři a vyučující" variant="compact" showPhoto={false} showPhone showWorkplace={false} showStudyFields={false} includeDialogs /></div>{relatedGalleries.length > 0 && <div class="mt-14 border-t border-ink/10 pt-10"><p class="eyebrow">V obrazech</p><h2 class="mt-2 text-2xl">Galerie oboru</h2><div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{relatedGalleries.slice(0, 6).map((gallery) => <a class="card block border-l-4 border-l-school-cyan p-5 no-underline transition hover:-translate-y-1 hover:shadow-soft" href={withBase(`/galerie/${gallery.id}/`)}><span class="meta-label">Fotogalerie</span><strong class="mt-2 block text-lg text-night">{gallery.data.title.replace(/^Fotogalerie:\s*/u, '')}</strong><span class="mt-2 block text-sm leading-6 text-ink/70">{gallery.data.description}</span></a>)}</div></div>}</section>
+</BaseLayout>

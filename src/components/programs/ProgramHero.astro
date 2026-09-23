@@ -1,0 +1,60 @@
+---
+import { withBase } from '../../lib/content';
+import AttachmentLink from '../content/AttachmentLink.astro';
+import ProgramHeroMedia from './ProgramHeroMedia.astro';
+
+interface Program {
+  code: string;
+  title: string;
+  form: string;
+  capacity: number;
+  description: string;
+  heroImage?: string;
+  heroVideo?: string;
+}
+
+interface Props {
+  accent: string;
+  program: Program;
+  tagline?: string;
+  applicantHref: string;
+  studyPlanDocument?: DocumentRef;
+  applicantDocument?: DocumentRef;
+}
+
+interface DocumentRef {
+  file: string;
+  title: string;
+  description: string;
+}
+
+const { accent, program, tagline, applicantHref, studyPlanDocument, applicantDocument } = Astro.props as Props;
+const isLightHero = accent !== '#1A4053' && accent !== '#C42079';
+const heroLinkClass = isLightHero
+  ? 'border-ink/15 bg-night/10 text-night hover:bg-white'
+  : 'border-white/25 bg-white/20 text-white hover:bg-white hover:text-night';
+const links = [
+  { label: 'Školní vzdělávací plán', href: '/dokumenty/', document: studyPlanDocument },
+  { label: 'Průběh studia', href: '#obor-content' },
+  { label: 'Přijímací řízení', href: '/uchazeci/' },
+  { label: 'Informace pro uchazeče', href: applicantHref, document: applicantDocument }
+];
+---
+
+<section class="container-page pb-10 sm:pb-14">
+  <div class="overflow-hidden rounded-2xl shadow-lift" style={`background-color: ${accent}`}>
+    <div class="relative aspect-[1600/600] min-h-[15rem]" style={`background-color: ${accent}`}>
+      <ProgramHeroMedia accent={accent} alt={program.title} image={program.heroImage} video={program.heroVideo} />
+    </div>
+    <div class="px-6 py-8 text-night sm:px-10 sm:py-10 lg:px-14 lg:py-12" style={`background-color: ${accent}`}>
+      <p class:list={['text-xs font-bold uppercase tracking-[0.18em]', isLightHero ? 'text-night/70' : 'text-white/70']}>{program.form}</p>
+      <h1 class:list={['mt-3 text-4xl font-black uppercase tracking-tight sm:text-5xl', isLightHero ? 'text-night' : 'text-white']}>{program.code} {program.title}</h1>
+      {tagline && <p class:list={['mt-3 text-lg font-bold sm:text-2xl', isLightHero ? 'text-night' : 'text-white']}>{tagline}</p>}
+      <p class:list={['mt-4 max-w-4xl text-base leading-7 sm:text-lg', isLightHero ? 'text-night/80' : 'text-white/85']}>{program.description}</p>
+      <p class:list={['mt-6 text-xl font-black sm:text-2xl', isLightHero ? 'text-night' : 'text-white']}>Přijímáme {program.capacity} žáků</p>
+      <div class="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {links.map((link) => link.document ? <AttachmentLink label={link.label} url={link.document.file} description={link.document.description} class={`flex min-h-14 items-center justify-center rounded-xl border px-4 py-3 text-center text-sm font-bold no-underline transition hover:-translate-y-0.5 hover:shadow-soft ${heroLinkClass}`}>{link.label}</AttachmentLink> : <a href={withBase(link.href)} class={`flex min-h-14 items-center justify-center rounded-xl border px-4 py-3 text-center text-sm font-bold no-underline transition hover:-translate-y-0.5 hover:shadow-soft ${heroLinkClass}`}>{link.label}</a>)}
+      </div>
+    </div>
+  </div>
+</section>

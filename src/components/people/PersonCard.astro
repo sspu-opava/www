@@ -1,0 +1,54 @@
+---
+import type { PersonEntry } from '../../lib/people';
+import { formatPersonName, getPersonPhoto, getPersonPosition, getPersonWorkplace } from '../../lib/people';
+import { withBase } from '../../lib/content';
+import ResponsiveImage from '../ResponsiveImage.astro';
+import PersonMeta from './PersonMeta.astro';
+
+type Variant = 'vertical' | 'compact' | 'list';
+
+interface Props {
+  person: PersonEntry;
+  variant?: Variant;
+  showPhoto?: boolean;
+  showPhone?: boolean;
+  showWorkplace?: boolean;
+  showStudyFields?: boolean;
+  interactive?: boolean;
+}
+
+const {
+  person,
+  variant = 'vertical',
+  showPhoto = true,
+  showPhone = false,
+  showWorkplace = true,
+  showStudyFields = false,
+  interactive = true
+} = Astro.props as Props;
+const data = person.data;
+const photo = getPersonPhoto(data);
+const name = formatPersonName(data);
+const position = getPersonPosition(data);
+const workplace = getPersonWorkplace(data);
+const profileUrl = withBase(`/kontakt/${person.id}/`);
+---
+
+<article
+  class:list={["person-card", `person-card-${variant}`, "card", photo && showPhoto && "person-card-has-photo"]}
+  data-person-open={interactive ? person.id : undefined}
+  data-person-card
+>
+  {showPhoto && photo && <a class="person-card-photo" href={profileUrl} tabindex="-1" aria-hidden="true">
+    <ResponsiveImage src={photo.src} sizes="240px" alt={photo.alt} loading="lazy" style={photo.focalPoint ? `object-position:${photo.focalPoint}` : undefined} />
+  </a>}
+  <div class="person-card-content">
+    {workplace && <p class="person-card-workplace">{workplace}</p>}
+    <h3 class="person-card-name"><a href={profileUrl} class="no-underline hover:text-brand">{name}</a></h3>
+    <p class="person-card-position">{position}</p>
+    {variant !== 'compact' && <PersonMeta person={person} showWorkplace={showWorkplace && !workplace} showPhone={showPhone} phoneLimit={undefined} showStudyFields={showStudyFields} compact={variant !== 'vertical'} />}
+  </div>
+  {variant === 'compact' && <div class="person-card-contact-row">
+    <PersonMeta person={person} showWorkplace={showWorkplace && !workplace} showPhone={showPhone} phoneLimit={1} showStudyFields={showStudyFields} compact />
+  </div>}
+</article>

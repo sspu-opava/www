@@ -1,0 +1,15 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { entries } from '../../lib/content';
+import PageHero from '../../components/content/PageHero.astro';
+import GalleryGrid from '../../components/gallery/GalleryGrid.astro';
+import { heroImages } from '../../data/heroImages';
+const galleries = await entries('galleries');
+---
+<BaseLayout title="Fotogalerie" description="Škola obrazem: prostory SŠPU Opava, studentské práce, výstavy a školní život.">
+  <PageHero eyebrow="Škola" title="Fotogalerie" description="Prostory školy, práce studentů, výstavy i okamžiky ze společného školního života na jednom místě." accent="#ECAFAC" icon={heroImages.gallery} />
+  <section class="container-page pb-10 sm:pb-14" data-pagefind-body>
+    <span class="sr-only" data-pagefind-filter="typ">Přehled galerií</span>
+    <GalleryGrid galleries={galleries} />
+  </section>
+</BaseLayout>

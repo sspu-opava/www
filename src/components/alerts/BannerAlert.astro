@@ -1,0 +1,23 @@
+---
+import type { ResolvedHomepageAlert } from '../../data/alerts';
+import { formatDate, withBase } from '../../lib/content';
+
+interface Props { alert: ResolvedHomepageAlert }
+const { alert } = Astro.props;
+const articleUrl = withBase(`/aktuality/${alert.article.id}/`);
+---
+
+<div class:list={['alert-card alert-banner-card group isolate h-full min-h-64 overflow-hidden', `alert-tone-${alert.tone}`]}>
+  {alert.article.data.cover && <img src={withBase(alert.article.data.cover)} alt="" class="absolute inset-0 -z-10 h-full w-full object-cover opacity-60 transition duration-500 group-hover:scale-105 group-hover:opacity-70" loading="lazy" />}
+  <div class="absolute inset-0 -z-10 bg-gradient-to-r from-night via-night/85 to-night/35"></div>
+  <div class="relative z-10 flex h-full min-h-64 flex-col justify-end p-6 sm:p-7">
+    <div class="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-accent">
+      <span>{alert.label ?? alert.article.data.categories[0] ?? 'Aktualita'}</span>
+      <span aria-hidden="true">·</span>
+      <time datetime={alert.article.data.publishedAt.toISOString()}>{formatDate(alert.article.data.publishedAt)}</time>
+    </div>
+    <h3 class="mt-3 text-2xl text-white"><a href={articleUrl} class="no-underline transition hover:text-accent">{alert.article.data.title}</a></h3>
+    <p class="mt-3 max-w-xl leading-7 text-white/80">{alert.article.data.description}</p>
+    <a href={articleUrl} class="mt-5 inline-flex font-semibold text-white no-underline transition hover:text-accent">Praktické informace <span aria-hidden="true" class="ml-2 transition group-hover:translate-x-1">→</span></a>
+  </div>
+</div>

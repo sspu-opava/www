@@ -1,0 +1,246 @@
+---
+import type { EventEntry } from '../../lib/events';
+import { eventMetadata, eventOccursOn } from '../../lib/events';
+import { withBase } from '../../lib/content';
+import { getProgramColor, getProgramTextColor } from '../../data/articleVisuals';
+
+interface Props { events: EventEntry[]; initialMonth: string }
+const { events, initialMonth } = Astro.props;
+const [year, monthNumber] = initialMonth.split('-').map(Number);
+const firstDayOffset = (new Date(Date.UTC(year, monthNumber - 1, 1)).getUTCDay() + 6) % 7;
+const daysInMonth = new Date(Date.UTC(year, monthNumber, 0)).getUTCDate();
+const cells = Array.from({ length: Math.ceil((firstDayOffset + daysInMonth) / 7) * 7 }, (_, index) => {
+  const day = index - firstDayOffset + 1;
+  const date = day > 0 && day <= daysInMonth ? `${year.toString().padStart(4, '0')}-${monthNumber.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}` : '';
+  return { day, date };
+});
+const weekdays = ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne'];
+const currentDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Prague' }).format(new Date());
+const currentMonth = currentDate.slice(0, 7);
+const monthLabel = new Intl.DateTimeFormat('cs-CZ', { month: 'long', year: 'numeric', timeZone: 'Europe/Prague' }).format(new Date(Date.UTC(year, monthNumber - 1, 15, 12)));
+const metadata = events.map((event) => ({ ...eventMetadata(event), url: withBase(`/udalosti/${event.id}/`), accent: getProgramColor(event.data.programs), accentText: getProgramTextColor(event.data.programs) }));
+const dayData = (date: string) => {
+  const dayEvents = date ? events.filter((event) => eventOccursOn(event, date)) : [];
+  const startingEvents = dayEvents.filter((event) => event.data.startDate === date);
+  const continuingEvents = dayEvents.filter((event) => event.data.endDate && event.data.startDate < date);
+  const markerEvent = startingEvents[0] ?? dayEvents[0];
+  return { dayEvents, startingEvents, continuingEvents, markerEvent };
+};
+---
+<section class="event-calendar" data-event-calendar data-initial-month={initialMonth} data-current-month={currentMonth} data-current-date={currentDate} data-event-base={withBase('/udalosti/')} data-events={JSON.stringify(metadata)} data-pagefind-ignore aria-labelledby="event-calendar-title">
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <p class="eyebrow">Měsíční přehled</p>
+      <h2 id="event-calendar-title" class="mt-2 text-2xl capitalize" data-event-month-label>{monthLabel}</h2>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <button class="button-secondary !min-h-10 !px-3" type="button" data-event-calendar-prev aria-label="Předchozí měsíc">← <span class="hidden sm:inline">Předchozí</span></button>
+      <button class="button-secondary !min-h-10 !px-3" type="button" data-event-calendar-today>Aktuální měsíc</button>
+      <button class="button-secondary !min-h-10 !px-3" type="button" data-event-calendar-next aria-label="Následující měsíc"><span class="hidden sm:inline">Další</span> →</button>
+    </div>
+  </div>
+  <div class="mt-6 overflow-hidden rounded-2xl border border-ink/10 bg-white shadow-soft">
+    <div class="event-calendar-weekdays" aria-hidden="true">{weekdays.map((day) => <span>{day}</span>)}</div>
+    <div class="event-calendar-grid" role="group" aria-label={`Kalendář událostí – ${monthLabel}`} data-event-calendar-grid>
+      {cells.map(({ day, date }) => {
+        const { dayEvents, startingEvents, continuingEvents, markerEvent } = dayData(date);
+        const isCurrent = date === currentDate;
+        const dayLabel = date ? `${day}. ${monthNumber}. ${year}${isCurrent ? ', dnes' : ''}${dayEvents.length ? `, ${dayEvents.length} událostí${continuingEvents.length && !startingEvents.length ? ', probíhající vícedenní akce' : ''}` : ''}` : 'Prázdný den';
+        return <div class:list={["event-calendar-cell", !date && "event-calendar-cell-empty", isCurrent && "event-calendar-cell-today"]} data-calendar-date={date}>
+          <button type="button" class:list={["event-calendar-day", dayEvents.length > 0 && "event-calendar-day-has-event", startingEvents.length > 0 && "event-calendar-day-event-start", dayEvents.length > 0 && startingEvents.length === 0 && "event-calendar-day-event-continuing", dayEvents.length > 1 && "event-calendar-day-overlap", isCurrent && "event-calendar-day-today"]} style={markerEvent ? `--event-day-color:${getProgramColor(markerEvent.data.programs)};--event-day-text:${getProgramTextColor(markerEvent.data.programs)}` : undefined} data-calendar-day={date} disabled={!date} aria-label={dayLabel}>{date ? day : ''}</button>
+        </div>;
+      })}
+    </div>
+  </div>
+  <p class="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm text-ink/65"><span><span class="event-calendar-legend-start" aria-hidden="true">12</span> začátek / jednodenní akce</span><span><span class="event-calendar-legend-continuing" aria-hidden="true">12</span> probíhající vícedenní akce</span><span><span class="event-calendar-legend-overlap" aria-hidden="true">12</span> více akcí ve dni</span><span class="event-calendar-legend-today">dnes</span></p>
+</section>
+
+<script>
+  import { civilToday, isCivilDate, isMonth } from '../../lib/publication.mjs';
+  const calendar = document.querySelector<HTMLElement>('[data-event-calendar]');
+  if (calendar) {
+    const events = JSON.parse(calendar.dataset.events || '[]');
+    const grid = calendar.querySelector<HTMLElement>('[data-event-calendar-grid]');
+    const label = calendar.querySelector<HTMLElement>('[data-event-month-label]');
+    const list = document.querySelector<HTMLElement>('[data-event-list]');
+    const resultCount = document.querySelector<HTMLElement>('[data-event-result-count]');
+    const monthInput = document.querySelector<HTMLInputElement>('[data-event-month-input]');
+    const dayInput = document.querySelector<HTMLInputElement>('[data-event-day-input]');
+    const tagsInputs = [...document.querySelectorAll<HTMLInputElement>('[data-event-tag-filter]')];
+    const filterInput = document.querySelector<HTMLInputElement>('[data-event-filter-input]');
+    const filterForm = document.querySelector<HTMLFormElement>('[data-event-filter-form]');
+    const filterOptionsElement = document.querySelector<HTMLElement>('[data-event-filters]');
+    const activeFilters = document.querySelector<HTMLElement>('[data-event-active-filters]');
+    const clearFilters = document.querySelector<HTMLAnchorElement>('[data-event-clear-filters]');
+    const filterOptions = JSON.parse(filterOptionsElement?.dataset.eventFilterOptions || '[]') as { kind: 'tag' | 'program'; value: string; label: string }[];
+    const currentDate = civilToday();
+    const initialParams = new URL(window.location.href).searchParams;
+    const queryTags = initialParams.getAll('stitky').flatMap((value) => value.split(',')).filter(Boolean);
+    const queryPrograms = initialParams.getAll('obor').flatMap((value) => value.split(',')).filter(Boolean);
+    const monthParam = initialParams.get('mesic');
+    const dayParam = initialParams.get('den');
+    const state = { month: isMonth(monthParam) ? monthParam! : currentDate.slice(0, 7), day: isCivilDate(dayParam) ? dayParam! : '', tags: [...new Set(queryTags)], programs: [...new Set(queryPrograms)] };
+    const pad = (value: number) => value.toString().padStart(2, '0');
+    const monthParts = (value: string) => value.split('-').map(Number);
+    const dateKey = (year: number, month: number, day: number) => `${year.toString().padStart(4, '0')}-${pad(month)}-${pad(day)}`;
+    const monthLabel = (value: string) => {
+      const [year, month] = monthParts(value);
+      return new Intl.DateTimeFormat('cs-CZ', { month: 'long', year: 'numeric', timeZone: 'Europe/Prague' }).format(new Date(Date.UTC(year, month - 1, 15, 12)));
+    };
+    const eventMatches = (event: { startDate: string; endDate?: string; tags: string[]; programs: string[] }) => {
+      const end = event.endDate || event.startDate;
+      const tagsMatch = state.tags.length === 0 || state.tags.some((tag) => event.tags.includes(tag));
+      const programMatch = state.programs.length === 0 || state.programs.some((program) => event.programs.includes(program));
+      const monthStart = `${state.month}-01`;
+      const [year, month] = monthParts(state.month);
+      const monthEnd = `${state.month}-${new Date(Date.UTC(year, month, 0)).getUTCDate().toString().padStart(2, '0')}`;
+      const monthMatch = event.startDate <= monthEnd && end >= monthStart;
+      return tagsMatch && programMatch && monthMatch;
+    };
+    const onDate = (event: { startDate: string; endDate?: string }, date: string) => event.startDate <= date && (event.endDate || event.startDate) >= date;
+    const renderCalendar = () => {
+      if (!grid) return;
+      const [year, month] = monthParts(state.month);
+      const firstDayOffset = (new Date(Date.UTC(year, month - 1, 1)).getUTCDay() + 6) % 7;
+      const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+      const cells = Math.ceil((firstDayOffset + daysInMonth) / 7) * 7;
+      const focusedDate = document.activeElement instanceof HTMLElement ? document.activeElement.dataset.calendarDay : undefined;
+      grid.replaceChildren();
+      if (label) label.textContent = monthLabel(state.month);
+      grid.setAttribute('aria-label', `Kalendář událostí – ${monthLabel(state.month)}`);
+      for (let index = 0; index < cells; index += 1) {
+        const day = index - firstDayOffset + 1;
+        const date = day > 0 && day <= daysInMonth ? dateKey(year, month, day) : '';
+        const dayEvents = date ? events.filter((event: { startDate: string; endDate?: string; tags: string[]; programs: string[] }) => onDate(event, date) && eventMatches(event)) : [];
+        const startingEvents = dayEvents.filter((event: { startDate: string }) => event.startDate === date);
+        const continuingEvents = dayEvents.filter((event: { startDate: string; endDate?: string }) => Boolean(event.endDate && event.startDate < date));
+        const markerEvent = startingEvents[0] || dayEvents[0];
+        const cell = document.createElement('div');
+        cell.className = `event-calendar-cell${date === currentDate ? ' event-calendar-cell-today' : ''}${!date ? ' event-calendar-cell-empty' : ''}`;
+
+        cell.dataset.calendarDate = date;
+        const dayButton = document.createElement('button');
+        dayButton.type = 'button';
+        dayButton.className = `event-calendar-day${dayEvents.length ? ' event-calendar-day-has-event' : ''}${startingEvents.length ? ' event-calendar-day-event-start' : ''}${dayEvents.length && !startingEvents.length ? ' event-calendar-day-event-continuing' : ''}${dayEvents.length > 1 ? ' event-calendar-day-overlap' : ''}${date === currentDate ? ' event-calendar-day-today' : ''}`;
+        dayButton.dataset.calendarDay = date;
+        dayButton.disabled = !date;
+        dayButton.setAttribute('aria-pressed', String(date !== '' && date === state.day));
+        dayButton.setAttribute('aria-label', date ? `${day}. ${month}. ${year}${date === currentDate ? ', dnes' : ''}${dayEvents.length ? `, ${dayEvents.length} událostí${continuingEvents.length && !startingEvents.length ? ', probíhající vícedenní akce' : ''}` : ''}` : 'Prázdný den');
+        if (markerEvent) {
+          dayButton.style.setProperty('--event-day-color', markerEvent.accent || '#6B7280');
+          dayButton.style.setProperty('--event-day-text', markerEvent.accentText || '#FFFFFF');
+        }
+        dayButton.textContent = date ? String(day) : '';
+        cell.append(dayButton);
+        grid.append(cell);
+      }
+      if (focusedDate) grid.querySelector<HTMLButtonElement>(`[data-calendar-day="${focusedDate}"]`)?.focus();
+      grid.querySelectorAll<HTMLElement>('[data-calendar-day]').forEach((button) => button.classList.toggle('event-calendar-day-selected', Boolean(button.dataset.calendarDay && button.dataset.calendarDay === state.day)));
+    };
+    const ensureEmpty = () => {
+      if (!list) return;
+      let empty = list.querySelector<HTMLElement>('[data-event-empty]');
+      const hasVisible = list.querySelector('[data-event-list-item]:not([hidden])');
+      if (!hasVisible && !empty) { empty = document.createElement('p'); empty.className = 'event-list-empty info-panel'; empty.dataset.eventEmpty = 'true'; empty.textContent = 'Pro zvolené filtry nejsou naplánovány žádné události.'; list.append(empty); }
+      if (empty) empty.hidden = Boolean(hasVisible);
+    };
+    const syncList = () => {
+      if (!list) return;
+      const monthFilter = list.dataset.eventListMonthFilter === 'true';
+      let visibleCount = 0;
+      list.querySelectorAll<HTMLElement>('[data-event-list-item]').forEach((item) => {
+        const start = item.dataset.eventStart || item.querySelector<HTMLElement>('[data-event-card]')?.dataset.eventStart || '';
+        const end = item.dataset.eventEnd || item.querySelector<HTMLElement>('[data-event-card]')?.dataset.eventEnd || start;
+        const tags = (item.dataset.eventTags || item.querySelector<HTMLElement>('[data-event-card]')?.dataset.eventTags || '').split(',').filter(Boolean);
+        const programs = (item.dataset.eventPrograms || item.querySelector<HTMLElement>('[data-event-card]')?.dataset.eventPrograms || '').split(',').filter(Boolean);
+        const monthStart = `${state.month}-01`;
+        const [year, month] = monthParts(state.month);
+        const monthEnd = `${state.month}-${new Date(Date.UTC(year, month, 0)).getUTCDate().toString().padStart(2, '0')}`;
+        const monthMatch = !monthFilter || (start <= monthEnd && end >= monthStart);
+        const dayMatch = !state.day || (start <= state.day && end >= state.day);
+        const visible = monthMatch && dayMatch && (state.tags.length === 0 || state.tags.some((tag) => tags.includes(tag))) && (state.programs.length === 0 || state.programs.some((program) => programs.includes(program)));
+        item.hidden = !visible;
+        if (visible) visibleCount += 1;
+      });
+      if (resultCount) resultCount.textContent = String(visibleCount);
+      ensureEmpty();
+    };
+    const optionLabel = (kind: 'tag' | 'program', value: string) => filterOptions.find((option) => option.kind === kind && option.value === value)?.label || value;
+    const renderActiveFilters = () => {
+      if (!activeFilters) return;
+      activeFilters.replaceChildren();
+      const activeCount = state.tags.length + state.programs.length + (state.day ? 1 : 0);
+      activeFilters.hidden = activeCount === 0;
+      if (clearFilters) clearFilters.hidden = activeCount === 0;
+      if (activeCount === 0) return;
+      const label = document.createElement('span');
+      label.className = 'event-active-filters-label';
+      label.textContent = 'Aktivní:';
+      activeFilters.append(label);
+      const add = (kind: 'tag' | 'program' | 'day', value: string, text: string) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'event-active-filter';
+        button.dataset.removeEventFilter = kind;
+        button.dataset.eventFilterValue = value;
+        button.append(document.createTextNode(text));
+        const close = document.createElement('span');
+        close.setAttribute('aria-hidden', 'true');
+        close.textContent = ' ×';
+        button.append(close);
+        activeFilters.append(button);
+      };
+      state.tags.forEach((tag) => add('tag', tag, optionLabel('tag', tag)));
+      state.programs.forEach((program) => add('program', program, optionLabel('program', program)));
+      if (state.day) add('day', state.day, state.day);
+    };
+    const syncControls = () => {
+      tagsInputs.forEach((input) => { input.checked = state.tags.includes(input.value); });
+      if (monthInput) monthInput.value = state.month;
+      if (dayInput) dayInput.value = state.day;
+      if (filterInput) filterInput.value = '';
+      renderActiveFilters();
+    };
+    const syncUrl = () => {
+      const url = new URL(window.location.href);
+      if (state.tags.length) url.searchParams.set('stitky', state.tags.join(',')); else url.searchParams.delete('stitky');
+      if (state.programs.length) url.searchParams.set('obor', state.programs.join(',')); else url.searchParams.delete('obor');
+      url.searchParams.set('mesic', state.month);
+      if (state.day) url.searchParams.set('den', state.day); else url.searchParams.delete('den');
+      window.history.replaceState({}, '', url);
+    };
+    const apply = (updateUrl = true) => { renderCalendar(); syncList(); syncControls(); if (updateUrl) syncUrl(); };
+    tagsInputs.forEach((input) => input.addEventListener('change', () => { state.tags = tagsInputs.filter((item) => item.checked).map((item) => item.value); state.day = ''; apply(); }));
+    filterInput?.addEventListener('input', () => filterInput.setCustomValidity(''));
+    filterForm?.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const query = filterInput?.value.trim().toLocaleLowerCase('cs-CZ') || '';
+      const option = filterOptions.find((item) => item.label.toLocaleLowerCase('cs-CZ') === query || item.value.toLocaleLowerCase('cs-CZ') === query);
+      if (!option) {
+        filterInput?.setCustomValidity('Vyberte štítek nebo obor z našeptávače.');
+        filterInput?.reportValidity();
+        return;
+      }
+      if (option.kind === 'tag' && !state.tags.includes(option.value)) state.tags = [...state.tags, option.value];
+      if (option.kind === 'program' && !state.programs.includes(option.value)) state.programs = [...state.programs, option.value];
+      state.day = '';
+      apply();
+    });
+    activeFilters?.addEventListener('click', (event) => {
+      const target = event.target;
+      const button = target instanceof Element ? target.closest<HTMLButtonElement>('[data-remove-event-filter]') : null;
+      if (!button) return;
+      const kind = button.dataset.removeEventFilter;
+      const value = button.dataset.eventFilterValue || '';
+      if (kind === 'tag') state.tags = state.tags.filter((tag) => tag !== value);
+      if (kind === 'program') state.programs = state.programs.filter((program) => program !== value);
+      if (kind === 'day') state.day = '';
+      apply();
+    });
+    calendar.querySelector('[data-event-calendar-prev]')?.addEventListener('click', () => { const [year, month] = monthParts(state.month); const date = new Date(Date.UTC(year, month - 2, 1)); state.month = `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}`; state.day = ''; apply(); });
+    calendar.querySelector('[data-event-calendar-next]')?.addEventListener('click', () => { const [year, month] = monthParts(state.month); const date = new Date(Date.UTC(year, month, 1)); state.month = `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}`; state.day = ''; apply(); });
+    calendar.querySelector('[data-event-calendar-today]')?.addEventListener('click', () => { state.month = currentDate.slice(0, 7); state.day = ''; apply(); });
+    calendar.addEventListener('click', (event) => { const target = event.target; const button = target instanceof Element ? target.closest<HTMLButtonElement>('[data-calendar-day]') : null; if (!button?.dataset.calendarDay) return; state.day = state.day === button.dataset.calendarDay ? '' : button.dataset.calendarDay; apply(); });
+    apply(false);
+  }
+</script>

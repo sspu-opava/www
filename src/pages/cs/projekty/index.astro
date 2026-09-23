@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHero from '../../../components/content/PageHero.astro';
+import ProjectCard from '../../../components/projects/ProjectCard.astro';
+import ProjectFilters from '../../../components/projects/ProjectFilters.astro';
+import { entries } from '../../../lib/content';
+import { projectStatusLabel, projectYears } from '../../../lib/projects';
+import { heroImages } from '../../../data/heroImages';
+
+const projects = (await entries('projects')).sort((a, b) => {
+  if (a.data.featured !== b.data.featured) return Number(b.data.featured) - Number(a.data.featured);
+  return (b.data.startDate ?? '').localeCompare(a.data.startDate ?? '');
+});
+const activeProjects = projects.filter((project) => project.data.status === 'active');
+const historicalProjects = projects.filter((project) => project.data.status !== 'active');
+const programmes = [...new Set(projects.map((project) => project.data.programme).filter((value): value is string => Boolean(value)))].sort((a, b) => a.localeCompare(b, 'cs'));
+const topics = [...new Set(projects.flatMap((project) => project.data.topics))].sort((a, b) => a.localeCompare(b, 'cs'));
+const years = [...new Set(projects.flatMap((project) => projectYears(project.data)))].sort((a, b) => b.localeCompare(a));
+const statuses = (['active', 'completed', 'archived'] as const).map((value) => ({ value, label: projectStatusLabel(value) }));
+---
+
+<BaseLayout title="Projekty" description="Přehled probíhajících, ukončených a archivních projektů SŠPU Opava." breadcrumbs={[{ label: 'Projekty' }]}>
+  <PageHero eyebrow="Škola" title="Projekty" description="Projekty, které rozvíjejí odborné vzdělávání, moderní technologie, mezinárodní zkušenosti i spolupráci školy s partnery." accent="#D0D543" icon={heroImages.projects} iconBackground="#001731" />
+  <section class="container-page pb-16 sm:pb-20" data-pagefind-body>
+    <span class="sr-only" data-pagefind-filter="typ">Projekty</span>
+    <ProjectFilters statuses={statuses} programmes={programmes} topics={topics} years={years} />
+
+    <div class="mt-12 space-y-14">
+      <section aria-labelledby="active-projects-title">
+        <div class="project-section-heading"><p class="eyebrow">Aktuálně</p><h2 id="active-projects-title" class="mt-2">Probíhající projekty</h2></div>
+        {activeProjects.length > 0 ? <div class="project-grid">{activeProjects.map((project) => <ProjectCard project={project} />)}</div> : <p class="project-empty">Momentálně není evidován žádný probíhající projekt.</p>}
+      </section>
+      <section aria-labelledby="historical-projects-title">
+        <div class="project-section-heading"><p class="eyebrow">Archiv</p><h2 id="historical-projects-title" class="mt-2">Ukončené a archivní projekty</h2></div>
+        {historicalProjects.length > 0 ? <div class="project-grid">{historicalProjects.map((project) => <ProjectCard project={project} />)}</div> : <p class="project-empty">Historické projekty zatím nejsou evidovány.</p>}
+      </section>
+    </div>
+  </section>
+</BaseLayout>

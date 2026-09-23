@@ -1,0 +1,14 @@
+---
+import type { ResolvedHomepageAlert } from '../../data/alerts';
+import AlertItem from './AlertItem.astro';
+
+interface Props { alerts: ResolvedHomepageAlert[] }
+const { alerts } = Astro.props;
+---
+
+{alerts.length > 0 && <section class="container-page py-8 sm:py-10" aria-label="Důležitá upozornění">
+  <h2 class="sr-only">Důležitá upozornění</h2>
+  <div class="grid gap-4 md:grid-cols-12">
+    {alerts.map((alert) => <AlertItem alert={alert} />)}
+  </div>
+</section>}

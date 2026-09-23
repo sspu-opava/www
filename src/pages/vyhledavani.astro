@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/content/PageHero.astro';
+import { searchContent } from '../lib/search-content';
+const content = await searchContent();
+const filters = [
+  ['typ', 'Typ obsahu'], ['obor', 'Obor'], ['rubrika', 'Kategorie'], ['stitek', 'Štítek'], ['rok', 'Rok']
+] as const;
+const values = (key: typeof filters[number][0]) => [...new Set(content.flatMap(item => item.filters[key]))].sort((a, b) => key === 'rok' ? b.localeCompare(a) : a.localeCompare(b, 'cs'));
+---
+<BaseLayout title="Vyhledávání" description="Fulltextové vyhledávání napříč obsahem SŠPU Opava." seo={{ noindex: true }}>
+  <PageHero eyebrow="Ostatní" title="Vyhledávání" description="Hledejte ve stránkách, aktualitách, oborech, galeriích, dokumentech, událostech i kontaktech." accent="#59BDDC" />
+  <section class="container-page pb-16" data-pagefind-ignore="all">
+    <form class="grid gap-5 rounded-3xl bg-mist p-5 sm:p-7" data-search-form role="search">
+      <div class="grid gap-3 sm:grid-cols-[1fr_auto]"><label class="grid gap-2 font-bold" for="content-search">Hledaný výraz<input id="content-search" name="q" type="search" class="min-h-12 min-w-0 rounded-xl border border-ink/25 bg-white px-4 font-normal" placeholder="Např. přijímačky, CNC, Erasmus…" /></label><button class="button-primary self-end" type="submit">Hledat</button></div>
+      <details data-search-filter-panel><summary class="cursor-pointer py-2 font-bold text-brand">Upřesnit hledání</summary><div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">{filters.map(([key, label]) => <label class="grid min-w-0 gap-2 text-sm font-bold" for={`filter-${key}`}>{label}<select id={`filter-${key}`} name={key} class="min-h-12 min-w-0 max-w-full rounded-xl border border-ink/25 bg-white px-3 font-normal"><option value="">Vše</option>{values(key).map(value => <option value={value}>{value}</option>)}</select></label>)}</div>
+      <button class="min-h-10 justify-self-start font-bold text-brand underline" type="button" data-search-clear>Zrušit filtry</button></details>
+    </form>
+    <p class="mt-6 text-sm text-ink/80" role="status" data-search-status>Zadejte výraz nebo vyberte filtr.</p>
+    <div class="mt-6 grid gap-4" data-search-results></div>
+    <button class="button-secondary mt-6" type="button" data-search-more hidden>Dalších 20 výsledků</button>
+    <noscript><p class="mt-8 rounded-xl bg-mist p-5">Pro fulltext je potřeba JavaScript. Obsah najdete i v přehledech článků, oborů, dokumentů, galerií a kontaktů v navigaci.</p></noscript>
+  </section>
+</BaseLayout>
+<script>import '../scripts/search';</script>

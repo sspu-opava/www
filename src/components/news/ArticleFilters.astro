@@ -1,0 +1,73 @@
+---
+interface ProgramOption { id: string; title: string }
+interface Props {
+  categories?: string[];
+  programs?: ProgramOption[];
+  years?: number[];
+  authors?: string[];
+}
+
+const { categories = [], programs = [], years = [], authors = [] } = Astro.props;
+---
+
+<form class="card mt-8 grid gap-4 p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-4" aria-label="Filtrování aktualit" data-news-filters>
+  <label class="grid gap-2 text-sm font-bold" for="news-category">Rubrika
+    <select id="news-category" class="rounded-xl border border-ink/15 bg-paper px-3 py-2.5 font-normal shadow-inner focus:border-school-cyan" name="category">
+      <option value="">Všechny rubriky</option>
+      {categories.map((item) => <option value={item}>{item}</option>)}
+    </select>
+  </label>
+  <label class="grid gap-2 text-sm font-bold" for="news-program">Obor
+    <select id="news-program" class="rounded-xl border border-ink/15 bg-paper px-3 py-2.5 font-normal shadow-inner focus:border-school-cyan" name="program">
+      <option value="">Všechny obory</option>
+      {programs.map((item) => <option value={item.id}>{item.title}</option>)}
+    </select>
+  </label>
+  <label class="grid gap-2 text-sm font-bold" for="news-year">Rok
+    <select id="news-year" class="rounded-xl border border-ink/15 bg-paper px-3 py-2.5 font-normal shadow-inner focus:border-school-cyan" name="year">
+      <option value="">Všechny roky</option>
+      {years.map((year) => <option value={year}>{year}</option>)}
+    </select>
+  </label>
+  <label class="grid gap-2 text-sm font-bold" for="news-author">Autor
+    <select id="news-author" class="rounded-xl border border-ink/15 bg-paper px-3 py-2.5 font-normal shadow-inner focus:border-school-cyan" name="author">
+      <option value="">Všichni autoři</option>
+      {authors.map((author) => <option value={author}>{author}</option>)}
+    </select>
+  </label>
+  <div class="flex flex-wrap items-center justify-between gap-3 sm:col-span-2 lg:col-span-4">
+    <p class="text-sm font-medium text-ink/70" aria-live="polite" data-filter-status>Vyberte rubriku, obor nebo rok.</p>
+    <button type="reset" class="text-sm font-bold text-brand underline underline-offset-4 hover:text-school-magenta">Zrušit filtry</button>
+  </div>
+</form>
+
+<script>
+  const filterForms = [...document.querySelectorAll<HTMLFormElement>('[data-news-filters]')];
+  filterForms.forEach((form) => {
+    const names = ['category', 'program', 'year', 'author'];
+    const status = form.querySelector<HTMLElement>('[data-filter-status]');
+    const params = new URLSearchParams(window.location.search);
+    names.forEach((name) => {
+      const field = form.elements.namedItem(name);
+      if (field instanceof HTMLSelectElement && params.has(name)) field.value = params.get(name) ?? '';
+    });
+
+    const update = () => {
+      const next = new URLSearchParams(window.location.search);
+      let active = 0;
+      names.forEach((name) => {
+        const field = form.elements.namedItem(name);
+        if (!(field instanceof HTMLSelectElement)) return;
+        if (field.value) { next.set(name, field.value); active++; } else next.delete(name);
+      });
+      const query = next.toString();
+      window.history.replaceState({}, '', `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`);
+      if (status) status.textContent = active ? `Aktivní filtry: ${active}.` : 'Vyberte rubriku, obor nebo rok.';
+      document.dispatchEvent(new CustomEvent('news-filter-change'));
+    };
+
+    form.addEventListener('input', update);
+    form.addEventListener('reset', () => window.setTimeout(update, 0));
+    update();
+  });
+</script>

@@ -1,0 +1,32 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getArticleFallback } from '../../data/articleVisuals';
+import ResponsiveImage from '../ResponsiveImage.astro';
+
+type Article = CollectionEntry<'articles'>;
+
+interface Props {
+  article?: Article;
+  src?: string;
+  alt?: string;
+  loading?: 'eager' | 'lazy';
+  class?: string;
+  imageClass?: string;
+}
+
+const { article, src = article?.data.cover, alt = article?.data.coverAlt || '', loading = 'lazy', class: className = '', imageClass = '' } = Astro.props;
+const fallback = article ? getArticleFallback(article.data.categories) : undefined;
+---
+
+{(src || fallback) && <div class:list={['overflow-hidden bg-mist', className]}>
+  {src ? <ResponsiveImage src={src} alt={alt} class:list={['h-full w-full object-cover', imageClass]} loading={loading} /> : <div
+    class="article-media-fallback relative h-full w-full"
+    style={`--article-fallback-primary:${fallback?.primary};--article-fallback-secondary:${fallback?.secondary}`}
+    aria-hidden="true"
+  >
+    <span class="article-media-fallback-shape article-media-fallback-shape-one"></span>
+    <span class="article-media-fallback-shape article-media-fallback-shape-two"></span>
+    <span class="article-media-fallback-shape article-media-fallback-shape-three"></span>
+    <span class="absolute bottom-5 left-5 text-xs font-bold uppercase tracking-[0.18em] text-white/75 sm:bottom-7 sm:left-7">{fallback?.label}</span>
+  </div>}
+</div>}

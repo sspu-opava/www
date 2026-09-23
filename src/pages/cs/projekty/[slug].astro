@@ -1,0 +1,53 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ProjectMeta from '../../../components/projects/ProjectMeta.astro';
+import ProjectGallery from '../../../components/projects/ProjectGallery.astro';
+import ProjectLinks from '../../../components/projects/ProjectLinks.astro';
+import ProjectFundingBadge from '../../../components/projects/ProjectFundingBadge.astro';
+import { entries, withBase } from '../../../lib/content';
+import { projectStatusClass, projectStatusLabel } from '../../../lib/projects';
+
+export async function getStaticPaths() {
+  return (await entries('projects')).map((project) => ({ params: { slug: project.id }, props: { project } }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+const data = project.data;
+---
+
+<BaseLayout title={data.title} description={data.summary} seo={data.seo} breadcrumbs={[{ label: 'Projekty', href: '/cs/projekty/' }, { label: data.title }]} schema={{ '@context': 'https://schema.org', '@type': 'Project', name: data.title, description: data.summary, url: new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin).href }}>
+  <article class="container-page pb-16 sm:pb-20" data-pagefind-body>
+    <span class="sr-only" data-pagefind-filter="typ">Projekt</span>
+    {data.topics.map((topic) => <span class="sr-only" data-pagefind-filter="téma">{topic}</span>)}
+    <a href={withBase('/cs/projekty/')} class="project-back-link">← Zpět na přehled projektů</a>
+
+    <header class="project-detail-hero">
+      <div class="project-detail-hero-media">
+        {data.heroImage
+          ? <img src={withBase(data.heroImage)} alt={data.title} />
+          : <div class="project-detail-fallback" aria-hidden="true"><span>{data.title}</span></div>}
+      </div>
+      <div class="project-detail-hero-copy">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class:list={['project-status', projectStatusClass(data.status)]}>{projectStatusLabel(data.status)}</span>
+          {data.featured && <span class="project-featured-label">Doporučený projekt</span>}
+        </div>
+        <h1>{data.title}</h1>
+        <p class="project-detail-summary">{data.summary}</p>
+        <ProjectFundingBadge text={data.funding} />
+      </div>
+    </header>
+
+    <div class="project-detail-meta-wrap"><ProjectMeta project={project} /></div>
+    <div class="project-detail-content"><div class="prose-school"><Content /></div></div>
+    <ProjectLinks links={data.links} />
+    <ProjectGallery photos={data.gallery} title={data.title} />
+    {data.partners.length > 0 && <section class="project-detail-section" aria-labelledby="project-partners-title">
+      <p class="section-label">Spolupráce</p>
+      <h2 id="project-partners-title" class="mt-2">Partneři projektu</h2>
+      <ul class="project-partners-list">{data.partners.map((partner) => <li>{partner.url ? <a href={partner.url} target="_blank" rel="noopener noreferrer">{partner.name} <span aria-hidden="true">↗</span></a> : <span>{partner.name}</span>}</li>)}</ul>
+    </section>}
+  </article>
+</BaseLayout>

@@ -1,0 +1,20 @@
+---
+import { withBase } from '../../lib/content';
+
+interface Props {
+  accent: string;
+  alt: string;
+  image?: string;
+  video?: string;
+}
+
+const { accent, alt, image, video } = Astro.props as Props;
+---
+
+<div class="relative aspect-[1600/600] min-h-[15rem] overflow-hidden" style={`background-color: ${accent}`}>
+  {video ? <video class="absolute inset-0 h-full w-full object-cover" controls muted playsinline preload="none" poster={image ? withBase(image) : undefined} aria-label={`Představení oboru ${alt}`}>
+    <source src={withBase(video)} type="video/mp4" />
+    {image && <img src={withBase(image)} alt={alt} class="h-full w-full object-cover" />}
+  </video> : image && <img src={withBase(image)} alt={alt} class="absolute inset-0 h-full w-full object-cover" fetchpriority="high" />}
+  {!video && <div class="pointer-events-none absolute inset-0" style={`background-color: color-mix(in srgb, ${accent} 35%, transparent)`}></div>}
+</div>

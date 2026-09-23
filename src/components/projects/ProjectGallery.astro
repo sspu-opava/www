@@ -1,0 +1,17 @@
+---
+import GalleryLightbox from '../GalleryLightbox.astro';
+
+interface Photo {
+  src: string;
+  alt: string;
+  caption?: string;
+}
+
+const { photos, title } = Astro.props as { photos: Photo[]; title: string };
+---
+
+{photos.length > 0 && <section class="project-detail-section" aria-labelledby="project-gallery-title">
+  <p class="section-label">Fotografie</p>
+  <h2 id="project-gallery-title" class="mt-2">Galerie projektu</h2>
+  <div class="mt-6"><GalleryLightbox photos={photos} title={title} /></div>
+</section>}

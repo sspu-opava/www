@@ -1,0 +1,19 @@
+---
+import type { ResolvedHomepageAlert } from '../../data/alerts';
+import { formatDate, withBase } from '../../lib/content';
+
+interface Props { alert: ResolvedHomepageAlert }
+const { alert } = Astro.props;
+const articleUrl = withBase(`/aktuality/${alert.article.id}/`);
+---
+
+<div class:list={['alert-card alert-text-card group h-full p-6 sm:p-7', `alert-tone-${alert.tone}`]}>
+  <div class="flex flex-wrap items-center gap-2 alert-meta">
+    <span>{alert.label ?? alert.article.data.categories[0] ?? 'Aktualita'}</span>
+    <span aria-hidden="true">·</span>
+    <time datetime={alert.article.data.publishedAt.toISOString()}>{formatDate(alert.article.data.publishedAt)}</time>
+  </div>
+  <h3 class="mt-3 text-2xl"><a href={articleUrl} class="no-underline transition hover:text-school-magenta">{alert.article.data.title}</a></h3>
+  <p class="mt-3 leading-7 alert-description">{alert.article.data.description}</p>
+  <a href={articleUrl} class="mt-5 inline-flex font-semibold no-underline alert-link">Číst aktualitu <span aria-hidden="true" class="ml-2 transition group-hover:translate-x-1">→</span></a>
+</div>

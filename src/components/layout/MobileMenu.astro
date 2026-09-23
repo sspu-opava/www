@@ -1,0 +1,64 @@
+---
+import { utilityLinks } from '../../data/navigation';
+import NavGroup from '../navigation/NavGroup.astro';
+import { withBase } from '../../lib/content';
+import type { NavGroup as NavGroupData } from '../../data/navigation';
+import { mainNavigation } from '../../data/navigation';
+---
+
+<div class="xl:hidden" data-mobile-menu-root>
+  <noscript><style>[data-mobile-menu-open] { display: none; }</style><details class="relative"><summary class="cursor-pointer rounded-lg border border-ink/20 px-3 py-2 font-bold">Menu</summary><nav aria-label="Hlavní navigace bez JavaScriptu" class="absolute right-0 top-full z-50 grid w-64 rounded-xl bg-white p-3 shadow-lift">{mainNavigation.map(group => <a href={withBase(group.href)} class="px-4 py-3 font-bold">{group.label}</a>)}<a href={withBase('/kontakt/')} class="px-4 py-3 font-bold">Kontakty</a></nav></details></noscript>
+  <button type="button" class="grid h-11 w-11 place-items-center rounded-lg border border-ink/15 bg-white text-night transition hover:border-brand hover:text-brand" aria-label="Otevřít hlavní menu" aria-expanded="false" aria-controls="mobile-menu-panel" data-mobile-menu-open>
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+  </button>
+  <dialog id="mobile-menu-panel" class="mobile-menu-dialog" aria-label="Mobilní menu" data-mobile-menu-panel>
+    <div class="flex items-center justify-between gap-4 border-b border-ink/10 pb-5">
+      <p class="eyebrow">Navigace</p>
+      <button type="button" class="grid h-11 w-11 place-items-center rounded-lg border border-ink/15 text-night transition hover:border-brand hover:text-brand" aria-label="Zavřít hlavní menu" data-mobile-menu-close>
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 6 12 12M18 6 6 18" /></svg>
+      </button>
+    </div>
+    <nav aria-label="Mobilní navigace" class="mt-4">
+      <a href={withBase('/')} class="block rounded-lg px-4 py-3 font-semibold no-underline transition hover:bg-mist hover:text-brand">Úvodní stránka</a>
+      {mainNavigation.map((group: NavGroupData) => <NavGroup group={group} variant="mobile" />)}
+    </nav>
+    <section class="mt-6 border-t border-ink/10 pt-5" aria-labelledby="mobile-systems-heading">
+      <p id="mobile-systems-heading" class="eyebrow">Online služby</p>
+      <div class="mt-3 grid gap-1">
+        {utilityLinks.map((link) => <a href={link.href} target="_blank" rel="noreferrer" class="flex items-center justify-between rounded-xl px-4 py-3 font-semibold no-underline transition hover:bg-mist hover:text-brand"><span>{link.shortLabel}</span><span aria-hidden="true">↗</span></a>)}
+      </div>
+    </section>
+  </dialog>
+</div>
+
+<script>
+  const mobileRoot = document.querySelector('[data-mobile-menu-root]');
+  const mobileOpen = mobileRoot?.querySelector('[data-mobile-menu-open]');
+  const mobileClose = mobileRoot?.querySelector('[data-mobile-menu-close]');
+  const mobilePanel = mobileRoot?.querySelector('[data-mobile-menu-panel]');
+
+  const setMobileMenu = (open: boolean) => {
+    if (!(mobileOpen instanceof HTMLButtonElement) || !(mobilePanel instanceof HTMLDialogElement)) return;
+    mobileOpen.setAttribute('aria-expanded', String(open));
+    document.body.classList.toggle('menu-open', open);
+    if (open) {
+      mobilePanel.showModal();
+      const firstFocusable = mobilePanel.querySelector('button, a, summary');
+      if (firstFocusable instanceof HTMLElement) firstFocusable.focus();
+    } else { mobilePanel.close(); mobileOpen.focus(); }
+  };
+
+  mobileOpen?.addEventListener('click', () => setMobileMenu(true));
+  mobileClose?.addEventListener('click', () => setMobileMenu(false));
+  mobilePanel?.addEventListener('click', (event) => {
+    if (event.target === mobilePanel) setMobileMenu(false);
+  });
+  mobilePanel?.addEventListener('close', () => {
+    mobileOpen?.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('menu-open');
+  });
+  const desktop = window.matchMedia('(min-width: 1280px)');
+  desktop.addEventListener('change', () => {
+    if (desktop.matches && mobilePanel instanceof HTMLDialogElement && mobilePanel.open) setMobileMenu(false);
+  });
+</script>

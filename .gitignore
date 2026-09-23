@@ -1,0 +1,10 @@
+.opencode
+node_modules/
+dist/
+.astro/
+.env
+.audit-tmp/
+reports/
+public/_media/
+src/data/generated-media.json
+# Média nahraná přes Pages/Decap CMS jsou součástí Git-backed obsahu.

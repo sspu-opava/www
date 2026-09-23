@@ -1,0 +1,14 @@
+---
+import { entries } from '../../lib/content';
+import { eventTagLabel } from '../../data/eventTags';
+interface Props { type: string; programs?: string[]; categories?: string[]; tags?: string[]; year?: number | string }
+const { type, programs = [], categories = [], tags = [], year } = Astro.props;
+const allPrograms = programs.length ? await entries('programs') : [];
+---
+<div data-pagefind-ignore>
+  <span class="sr-only" data-pagefind-filter="typ" data-pagefind-meta="typ">{type}</span>
+  {programs.map(id => <span class="sr-only" data-pagefind-filter="obor">{allPrograms.find(item => item.id === id)?.data.title ?? id}</span>)}
+  {categories.map(value => <span class="sr-only" data-pagefind-filter="rubrika">{value}</span>)}
+  {tags.map(value => <span class="sr-only" data-pagefind-filter="stitek">{eventTagLabel(value)}</span>)}
+  {year && <span class="sr-only" data-pagefind-filter="rok">{year}</span>}
+</div>

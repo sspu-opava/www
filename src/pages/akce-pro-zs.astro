@@ -1,0 +1,11 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/content/PageHero.astro';
+import EventSection from '../components/events/EventSection.astro';
+import { entries } from '../lib/content';
+const events = await entries('events');
+---
+<BaseLayout title="Akce pro ZŠ" description="Akce, návštěvy a programy SŠPU Opava pro žáky základních škol." breadcrumbs={[{ label: 'Uchazeči' }, { label: 'Akce pro ZŠ' }]}>
+  <PageHero eyebrow="Uchazeči" title="Akce pro ZŠ" description="Přijďte poznat školu, obory a prostředí, ve kterém naši žáci studují a tvoří." accent="#D0D543" icon="/images/banners/akce.png" iconBackground="#001731" />
+  <EventSection events={events} eyebrow="Kalendář" title="Nejbližší akce pro uchazeče" tags={['uchazeci']} limit={8} from="now" variant="compact" background="mist" showMoreLink showCalendarLink />
+</BaseLayout>

@@ -1,0 +1,40 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { entries, withBase } from '../../lib/content';
+import PageHero from '../../components/content/PageHero.astro';
+import { heroImages } from '../../data/heroImages';
+const programs = await entries('programs');
+const programVisuals: Record<string, { image?: string; border: string; title: string }> = {
+  strojirenstvi: { image: '/images/programs/strojirenstvi-banner.webp', border: 'border-school-steel', title: 'Strojírenství' },
+  'informacni-technologie': { image: '/images/programs/informacni-technologie-banner.webp', border: 'border-school-cyan', title: 'Informační technologie' },
+  'design-hracek': { image: '/images/programs/obor-design-hracek-banner.webp', border: 'border-school-coral', title: 'Design hraček' },
+  'prumyslovy-design': { image: '/images/programs/prumyslovy-design-banner.webp', border: 'border-school-lime', title: 'Průmyslový design' },
+  'graficky-design': { image: '/images/programs/graficky-design-banner.webp', border: 'border-school-magenta', title: 'Grafický design' }
+};
+const programGroups = [
+  { id: 'technical', title: 'TECHNICKÉ OBORY', titleClass: 'text-school-steel', ids: ['strojirenstvi', 'informacni-technologie'] },
+  { id: 'artistic', title: 'UMĚLECKÉ OBORY', titleClass: 'text-school-magenta', ids: ['design-hracek', 'prumyslovy-design', 'graficky-design'] }
+];
+---
+<BaseLayout title="Studijní obory" description="Pět maturitních oborů SŠPU Opava: technika, informační technologie, design a tvorba.">
+  <PageHero eyebrow="Uchazeči" title="Studijní obory" description="Pět čtyřletých maturitních oborů. Každý nabízí vlastní prostředí, projekty a cestu k dalšímu studiu nebo praxi." accent="#C42079" icon={heroImages.studyFields} />
+  <section class="container-page pb-10 sm:pb-14" data-pagefind-body>
+    <div class="space-y-12">
+      {programGroups.map((group) => {
+        const groupPrograms = group.ids.map((id) => programs.find((program) => program.id === id)).filter((program): program is (typeof programs)[number] => Boolean(program));
+        return <section aria-labelledby={`program-group-${group.id}`}>
+          <div class="mb-5"><h2 id={`program-group-${group.id}`} class:list={["m-0 text-xl font-bold tracking-[0.12em] sm:text-2xl", group.titleClass]}>{group.title}</h2></div>
+          <div class="grid gap-6 lg:grid-cols-2">
+            {groupPrograms.map((program) => {
+              const visual = programVisuals[program.id] ?? { image: program.data.heroImage, border: 'border-brand', title: program.data.title };
+              return <article class:list={["group card overflow-hidden border-t-4 transition duration-300 hover:-translate-y-1 hover:shadow-soft sm:grid sm:grid-cols-[.85fr_1.15fr]", visual.border]}>
+                <img src={visual.image && withBase(visual.image)} alt={visual.title} class="program-card-image h-52 w-full object-cover sm:h-full" loading="lazy" />
+                <div class="p-6 sm:p-8"><p class="meta-label">{program.data.code} · {program.data.capacity} míst</p><h3 class="mt-3 text-2xl"><a class="no-underline transition group-hover:text-school-magenta" href={withBase(`/obory/${program.id}/`)}>{visual.title}</a></h3><p class="mt-4 leading-7 text-ink/75">{program.data.description}</p><a class="mt-6 inline-flex font-bold text-brand no-underline transition group-hover:text-school-magenta" href={withBase(`/obory/${program.id}/`)}>Detail oboru <span aria-hidden="true" class="ml-2">→</span></a></div>
+              </article>;
+            })}
+          </div>
+        </section>;
+      })}
+    </div>
+  </section>
+</BaseLayout>

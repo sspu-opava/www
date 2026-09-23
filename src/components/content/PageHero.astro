@@ -1,0 +1,38 @@
+---
+import { withBase } from '../../lib/content';
+
+interface Props {
+  eyebrow?: string;
+  title: string;
+  description?: string;
+  accent?: string;
+  image?: string;
+  icon?: string;
+  iconAlt?: string;
+  iconBackground?: string;
+  iconVariant?: 'light' | 'dark';
+  decorativeArt?: boolean;
+  variant?: 'default' | 'history';
+}
+
+const { eyebrow = '', title, icon, iconAlt = '', iconVariant = 'dark' } = Astro.props;
+const pageContext = `${eyebrow} ${title}`.toLocaleLowerCase('cs');
+const fallbackIcon = pageContext.includes('galer')
+  ? '/images/banners/fotogalerie-light.svg'
+  : pageContext.includes('kontakt')
+    ? '/images/banners/kontakty-light.svg'
+    : pageContext.includes('dokument') || pageContext.includes('vyhled')
+      ? '/images/banners/dokumenty-light.svg'
+      : undefined;
+const sourceIcon = icon ?? fallbackIcon;
+const heroIcon = sourceIcon?.startsWith('/images/banners/')
+  ? sourceIcon.replace(/(?:-(?:light|dark))?\.svg$|\.png$/, `-${iconVariant}.svg`)
+  : sourceIcon;
+---
+
+<section class="page-hero container-page">
+  <div class:list={['page-hero-shell', heroIcon && 'page-hero-shell-with-icon']}>
+    <h1 class="page-hero-title" data-pagefind-meta="title">{title}</h1>
+    {heroIcon && <div class="page-hero-icon" aria-hidden="true"><img src={withBase(heroIcon)} alt={iconAlt} width="96" height="96" /></div>}
+  </div>
+</section>

@@ -1,0 +1,9 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionHub from '../components/content/SectionHub.astro';
+import { sectionHubs } from '../data/sectionHubs';
+const hub = sectionHubs.studenti;
+---
+<BaseLayout title={hub.label} description={hub.description} breadcrumbs={[{ label: hub.label }]}>
+  <SectionHub hub={hub} />
+</BaseLayout>

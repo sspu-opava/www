@@ -1,0 +1,66 @@
+---
+interface Props {
+  statuses: { value: string; label: string }[];
+  programmes: string[];
+  topics: string[];
+  years: string[];
+}
+
+const { statuses, programmes, topics, years } = Astro.props as Props;
+---
+
+<section class="project-filters" aria-labelledby="project-filters-title" data-project-filters>
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <p class="eyebrow">Výběr projektů</p>
+      <h2 id="project-filters-title" class="mt-2 text-2xl sm:text-3xl">Najděte projekt podle tématu nebo období</h2>
+    </div>
+    <button type="button" class="project-filter-clear" data-project-filter-clear>Vymazat filtry</button>
+  </div>
+  <form class="project-filter-grid" data-project-filter-form>
+    <label>Hledat podle názvu<input type="search" name="query" placeholder="Např. Erasmus+" data-project-query /></label>
+    <label>Stav<select name="status" data-project-status><option value="">Všechny stavy</option>{statuses.map((status) => <option value={status.value}>{status.label}</option>)}</select></label>
+    <label>Program<select name="programme" data-project-programme><option value="">Všechny programy</option>{programmes.map((programme) => <option value={programme}>{programme}</option>)}</select></label>
+    <label>Téma<select name="topic" data-project-topic><option value="">Všechna témata</option>{topics.map((topic) => <option value={topic}>{topic}</option>)}</select></label>
+    <label>Rok<select name="year" data-project-year><option value="">Všechna období</option>{years.map((year) => <option value={year}>{year}</option>)}</select></label>
+  </form>
+  <p class="project-filter-result" aria-live="polite" data-project-filter-result></p>
+  <noscript><p class="mt-4 text-sm text-ink/70">Bez JavaScriptu se zobrazují všechny projekty; filtrování je dostupné po jeho zapnutí.</p></noscript>
+</section>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-project-filters]');
+  const form = root?.querySelector<HTMLFormElement>('[data-project-filter-form]');
+  const cards = [...document.querySelectorAll<HTMLElement>('[data-project-card]')];
+  const result = root?.querySelector<HTMLElement>('[data-project-filter-result]');
+  const query = root?.querySelector<HTMLInputElement>('[data-project-query]');
+  const status = root?.querySelector<HTMLSelectElement>('[data-project-status]');
+  const programme = root?.querySelector<HTMLSelectElement>('[data-project-programme]');
+  const topic = root?.querySelector<HTMLSelectElement>('[data-project-topic]');
+  const year = root?.querySelector<HTMLSelectElement>('[data-project-year]');
+  const clear = root?.querySelector<HTMLButtonElement>('[data-project-filter-clear]');
+
+  const apply = () => {
+    const needle = query?.value.trim().toLocaleLowerCase('cs-CZ') || '';
+    const selectedStatus = status?.value || '';
+    const selectedProgramme = programme?.value || '';
+    const selectedTopic = topic?.value || '';
+    const selectedYear = year?.value || '';
+    let visible = 0;
+    cards.forEach((card) => {
+      const matches = (!needle || (card.dataset.projectSearch || '').toLocaleLowerCase('cs-CZ').includes(needle))
+        && (!selectedStatus || card.dataset.projectStatus === selectedStatus)
+        && (!selectedProgramme || card.dataset.projectProgramme === selectedProgramme)
+        && (!selectedTopic || (card.dataset.projectTopics || '').split('|').includes(selectedTopic))
+        && (!selectedYear || (card.dataset.projectYears || '').split('|').includes(selectedYear));
+      card.hidden = !matches;
+      if (matches) visible += 1;
+    });
+    if (result) result.textContent = `Zobrazeno projektů: ${visible} z ${cards.length}.`;
+  };
+
+  form?.addEventListener('input', apply);
+  form?.addEventListener('change', apply);
+  clear?.addEventListener('click', () => { form?.reset(); apply(); query?.focus(); });
+  apply();
+</script>

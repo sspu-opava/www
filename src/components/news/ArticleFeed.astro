@@ -1,0 +1,104 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import ArticlePreview from './ArticlePreview.astro';
+
+interface Props {
+  articles: CollectionEntry<'articles'>[];
+  variant?: 'default' | 'compact' | 'featured' | 'homepage';
+  initialCount?: number;
+  batchSize?: number;
+  class?: string;
+}
+
+const { articles, variant = 'default', initialCount = 6, batchSize = 6, class: className = '' } = Astro.props;
+const firstBatch = Math.min(initialCount, articles.length);
+---
+
+<div class:list={['article-feed', className]} data-news-feed data-initial-count={initialCount} data-batch-size={batchSize}>
+  <div class="grid gap-6 lg:grid-cols-3" data-news-feed-grid>
+    {articles.map((article, index) => <ArticlePreview article={article} variant={variant} deferred={index >= firstBatch} />)}
+  </div>
+  <p class="mt-7 text-center text-sm font-medium text-ink/65" aria-live="polite" data-news-feed-status>
+    Zobrazeno {firstBatch} z {articles.length} aktualit.
+  </p>
+  <div class="mt-5 flex flex-col items-center gap-3" data-news-load-more-wrap>
+    <button type="button" class="button-secondary" data-news-load-more hidden>Načíst další aktuality</button>
+    <span class="block h-px w-full" aria-hidden="true" data-news-sentinel></span>
+  </div>
+  <p class="mt-8 rounded-2xl border border-dashed border-ink/20 bg-white p-6 text-center text-ink/70" data-news-empty hidden>
+    Pro zadané filtry nebyla nalezena žádná aktualita.
+  </p>
+</div>
+
+<noscript><style>[data-news-deferred][data-news-card] { display: block !important; }</style></noscript>
+
+<script>
+  const feeds = [...document.querySelectorAll<HTMLElement>('[data-news-feed]')];
+
+  feeds.forEach((feed) => {
+    const cards = [...feed.querySelectorAll<HTMLElement>('[data-news-card]')];
+    const form = document.querySelector<HTMLFormElement>('[data-news-filters]');
+    const status = feed.querySelector<HTMLElement>('[data-news-feed-status]');
+    const empty = feed.querySelector<HTMLElement>('[data-news-empty]');
+    const loadMore = feed.querySelector<HTMLButtonElement>('[data-news-load-more]');
+    const sentinel = feed.querySelector<HTMLElement>('[data-news-sentinel]');
+    const initialCount = Number(feed.dataset.initialCount ?? 6);
+    const batchSize = Number(feed.dataset.batchSize ?? 6);
+    let shownCount = initialCount;
+    let observer: IntersectionObserver | undefined;
+
+    const value = (name: string) => form?.elements.namedItem(name) instanceof HTMLSelectElement
+      ? (form.elements.namedItem(name) as HTMLSelectElement).value
+      : '';
+    const matches = (card: HTMLElement) => {
+      const category = value('category');
+      const program = value('program');
+      const year = value('year');
+      const author = value('author');
+      return (!category || card.dataset.category?.split('|').includes(category))
+        && (!program || card.dataset.program?.split('|').includes(program))
+        && (!year || card.dataset.year === year)
+        && (!author || card.dataset.author === author);
+    };
+    const word = (count: number) => count === 1 ? 'aktualitu' : count < 5 ? 'aktuality' : 'aktualit';
+
+    const render = () => {
+      const matching = cards.filter(matches);
+      const visibleCards = new Set(matching.slice(0, shownCount));
+      cards.forEach(card => { card.hidden = !visibleCards.has(card); });
+      const visible = Math.min(shownCount, matching.length);
+      if (status) status.textContent = matching.length === 0
+        ? 'Zobrazeno: 0 aktualit.'
+        : `Zobrazeno ${visible} z ${matching.length} ${word(matching.length)}.`;
+      if (empty) empty.hidden = matching.length > 0;
+      if (loadMore) loadMore.hidden = visible >= matching.length;
+    };
+
+    const resetAndRender = () => {
+      shownCount = initialCount;
+      render();
+    };
+
+    form?.addEventListener('input', resetAndRender);
+    document.addEventListener('news-filter-change', resetAndRender);
+    loadMore?.addEventListener('click', () => {
+      shownCount += batchSize;
+      render();
+    });
+
+    if (sentinel && 'IntersectionObserver' in window) {
+      observer = new IntersectionObserver((entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          const matching = cards.filter(matches);
+          if (shownCount < matching.length) {
+            shownCount += batchSize;
+            render();
+          }
+        }
+      }, { rootMargin: '480px 0px' });
+      observer.observe(sentinel);
+    }
+
+    render();
+  });
+</script>

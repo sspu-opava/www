@@ -1,0 +1,26 @@
+---
+import PageHero from './PageHero.astro';
+import { withBase } from '../../lib/content';
+import type { SectionHub } from '../../data/sectionHubs';
+
+interface Props { hub: SectionHub }
+const { hub } = Astro.props;
+const darkBannerIcon = (icon: string) => icon.startsWith('/images/banners/')
+  ? icon.replace(/(?:-(?:light|dark))?\.svg$|\.png$/, '-dark.svg')
+  : icon;
+---
+<PageHero eyebrow={hub.eyebrow} title={hub.label} description={hub.description} accent={hub.accent} icon={hub.icon} iconVariant="light" />
+<section class="container-page pb-14 sm:pb-20" data-pagefind-body>
+  <span class="sr-only" data-pagefind-filter="typ">Rozcestník</span>
+  <div class="section-hub-grid mt-10">
+    {hub.items.map((item) => <a href={withBase(item.href)} class="section-hub-card group card flex h-full items-start gap-4 p-5 no-underline transition hover:-translate-y-1 hover:shadow-soft sm:p-6">
+      <span class="section-hub-card-icon shrink-0 rounded-xl bg-mist p-2.5" aria-hidden="true"><img src={withBase(darkBannerIcon(item.icon))} alt="" loading="lazy" /></span>
+      <span class="min-w-0">
+        <span class="block text-[0.68rem] font-bold uppercase tracking-[0.16em] text-ink/45">{hub.label}</span>
+        <h2 class="mt-2 text-xl text-night transition group-hover:text-brand">{item.label}</h2>
+        <span class="mt-2 block text-sm leading-6 text-ink/70">{item.description}</span>
+        <span class="mt-4 block text-sm font-bold text-brand">Otevřít <span aria-hidden="true">↗</span></span>
+      </span>
+    </a>)}
+  </div>
+</section>

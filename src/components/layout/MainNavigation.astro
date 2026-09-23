@@ -1,0 +1,45 @@
+---
+import { mainNavigation } from '../../data/navigation';
+import NavGroup from '../navigation/NavGroup.astro';
+---
+
+<nav aria-label="Hlavní navigace" class="hidden min-w-0 flex-1 xl:block">
+  <ul class="flex items-center justify-end gap-0.5" data-desktop-navigation>
+    {mainNavigation.map((group) => <li><NavGroup group={group} /></li>)}
+  </ul>
+</nav>
+
+<script>
+  const menuGroups = [...document.querySelectorAll('[data-menu-group]')];
+  const closeMenus = () => menuGroups.forEach((group) => {
+    const trigger = group.querySelector('[data-menu-trigger]');
+    const panel = group.querySelector('[data-menu-panel]');
+    if (trigger instanceof HTMLButtonElement && panel instanceof HTMLElement) {
+      trigger.setAttribute('aria-expanded', 'false');
+      panel.hidden = true;
+    }
+  });
+
+  menuGroups.forEach((group) => {
+    const trigger = group.querySelector('[data-menu-trigger]');
+    const panel = group.querySelector('[data-menu-panel]');
+    if (!(trigger instanceof HTMLButtonElement) || !(panel instanceof HTMLElement)) return;
+    trigger.addEventListener('click', () => {
+      const willOpen = trigger.getAttribute('aria-expanded') !== 'true';
+      closeMenus();
+      if (willOpen) {
+        trigger.setAttribute('aria-expanded', 'true');
+        panel.hidden = false;
+      }
+    });
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!(event.target instanceof Node)) return;
+    if (menuGroups.some((group) => group.contains(event.target as Node))) return;
+    closeMenus();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeMenus();
+  });
+</script>

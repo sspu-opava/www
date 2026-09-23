@@ -1,0 +1,43 @@
+---
+import type { JobOfferEntry } from '../../lib/jobOffers';
+import { withBase } from '../../lib/content';
+import AttachmentLink from '../content/AttachmentLink.astro';
+
+interface Props {
+  offer: JobOfferEntry;
+}
+
+const { offer } = Astro.props as Props;
+const data = offer.data;
+const search = [data.company, data.position, data.summary, data.location, data.field].filter(Boolean).join(' ');
+const fallbackUrl = data.applyUrl ?? data.sourceLinks[0]?.url;
+---
+
+<article
+  id={`nabidka-${offer.id}`}
+  class="job-offer-card card"
+  data-job-offer-card
+  data-job-offer-search={search}
+  data-job-offer-type={data.type}
+  data-job-offer-location={data.location ?? ''}
+  data-job-offer-field={data.field ?? ''}
+  data-job-offer-status={data.status}
+>
+  <div class="job-offer-card-top">
+    <div class="min-w-0">
+      <p class="job-offer-company">
+        {data.companyUrl ? <a href={data.companyUrl} target="_blank" rel="noopener">{data.company} <span aria-hidden="true">↗</span></a> : data.company}
+      </p>
+      <h3 class="job-offer-title">{data.position}</h3>
+    </div>
+  </div>
+
+  {data.summary && <p class="job-offer-summary">{data.summary}</p>}
+
+  <div class="job-offer-card-footer">
+    <div class="job-offer-actions" aria-label="Dokumenty a odkazy nabídky">
+      {data.attachments.map((attachment, index) => <AttachmentLink label={attachment.label} url={attachment.file} description={attachment.type ? `Dokument ${attachment.type.toUpperCase()} ke stažení.` : 'Dokument ke stažení.'} class="job-offer-symbol-button" title={index === 0 ? 'Otevřít nabídku' : 'Otevřít další dokument'}><span aria-hidden="true">{attachment.type?.toUpperCase() ?? 'PDF'}</span><span class="sr-only">{attachment.label}</span></AttachmentLink>)}
+      {!data.attachments.length && fallbackUrl && <a class="job-offer-symbol-button" href={withBase(fallbackUrl)} target="_blank" rel="noopener" title="Otevřít nabídku"><span aria-hidden="true">↗</span><span class="sr-only">Otevřít nabídku</span></a>}
+    </div>
+  </div>
+</article>

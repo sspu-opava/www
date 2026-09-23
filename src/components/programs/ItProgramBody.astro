@@ -1,0 +1,215 @@
+---
+import ContentRenderer from '../content/ContentRenderer.astro';
+import AccordionList from './AccordionList.astro';
+
+interface Props {
+  additionalBlocks?: unknown[];
+  programTitle: string;
+}
+
+const { additionalBlocks = [] } = Astro.props as Props;
+
+const careers = [
+  'Technik IT',
+  'Pracovník uživatelské podpory',
+  'Programátor',
+  'Správce aplikací',
+  'Správce operačních systémů',
+  'Správce počítačových sítí',
+  'Webový vývojář nebo webový kodér',
+  'Obchodník s prostředky informačních technologií'
+];
+
+const studyItems = [
+  {
+    title: 'Adaptační pobyt',
+    text: 'Hned v prvních zářijových dnech se nově utvořené třídy se svými třídními učiteli vzájemně poznávají na adaptačním kurzu v malebném prostředí Štramberka a jeho okolí.',
+    image: 'https://www.sspu-opava.cz/media/filer_public_thumbnails/filer_public/3f/93/3f93f746-2261-45e0-9cda-3e0d312d4759/adaptacni-kurzy.jpg__1600x901_q85_subject_location-800%2C450_subsampling-2.jpg',
+    alt: 'Adaptační pobyt studentů'
+  },
+  {
+    title: 'Odborná výuka',
+    text: 'Podstatná část odborně zaměřené výuky probíhá v budově laboratoří sousedící s hlavní budovou školy. Žáci využívají moderní učebny i školní e-learningový systém Moodle.',
+    image: 'https://www.sspu-opava.cz/media/filer_public_thumbnails/filer_public/79/c7/79c7bd7d-028c-4be1-afc7-baeca8e0d4de/it-odborna-vyuka.jpg__1600x900_q85_subject_location-800%2C450_subsampling-2.jpg',
+    alt: 'Odborná výuka oboru informační technologie'
+  },
+  {
+    title: 'Lyžařský kurz',
+    text: 'V prvním ročníku čeká studenty týdenní pobyt v Jeseníkách, kde si začátečníci i zkušení lyžaři a snowboardisté užijí společný čas na svazích Pradědu.',
+    image: 'https://www.sspu-opava.cz/media/filer_public_thumbnails/filer_public/73/dd/73dd2bae-6091-4de6-bde1-7cbd61622db4/lyzarsky-kurz.jpg__1600x901_q85_subject_location-800%2C450_subsampling-2.jpg',
+    alt: 'Lyžařský kurz studentů'
+  },
+  {
+    title: 'Samostatné projekty',
+    text: 'Praktické úlohy a samostatné projekty dávají studentům prostor tvořit webové stránky, programové aplikace, animovanou grafiku i návrhy počítačových sítí a hardwarových zařízení.',
+    image: 'https://www.sspu-opava.cz/media/filer_public_thumbnails/filer_public/d7/98/d7985e69-6cd6-4799-90b3-206beb48a1ea/it-vlastni-projekty.jpg__1600x900_q85_subject_location-800%2C450_subsampling-2.jpg',
+    alt: 'Samostatné projekty studentů oboru informační technologie'
+  },
+  {
+    title: 'Cykloturistický kurz',
+    text: 'Žáci třetích ročníků technických oborů vyrážejí v doprovodu učitelů na cykloturistický kurz a poznávají nejhezčí cyklostezky v okolí Opavy.',
+    image: 'https://www.sspu-opava.cz/media/filer_public_thumbnails/filer_public/33/de/33de168d-3b64-4edd-9fd2-51f52a6801e3/cyklisticke-kurzy.jpg__1600x901_q85_subject_location-800%2C450_subsampling-2.jpg',
+    alt: 'Cykloturistický kurz studentů'
+  },
+  {
+    title: 'Certifikáty z angličtiny',
+    text: 'Ve spolupráci s jazykovou školou Hello mohou žáci získat mezinárodně uznávané Cambridge Certificate na úrovních PET, FCE i CAE.',
+    image: 'https://www.sspu-opava.cz/media/filer_public_thumbnails/filer_public/37/e9/37e93f6d-d9f6-4079-a141-cd1becce7b94/jazykove-certifikatyi.jpg__1600x901_q85_subject_location-800%2C450_subsampling-2.jpg',
+    alt: 'Předávání jazykových certifikátů'
+  },
+  {
+    title: 'CISCO Academy',
+    text: 'Škola je zapojena do celosvětového programu pro výuku síťových specialistů. Praktická cvičení studenty vedou ke konfiguraci síťových zařízení a mohou vyústit v mezinárodně uznávaný certifikát.',
+    image: 'https://www.sspu-opava.cz/media/filer_public_thumbnails/filer_public/b3/59/b359d04b-7b36-4a0f-ba82-bfda41e018ba/cisco-academy.jpg__1600x901_q85_subject_location-800%2C450_subsampling-2.jpg',
+    alt: 'CISCO Academy'
+  },
+  {
+    title: 'Přednášky a exkurze',
+    text: 'Během studia se žáci setkávají s odborníky z praxe a navštěvují univerzitní pracoviště vybavená špičkovou technikou i automatizované provozy.',
+    image: 'https://www.sspu-opava.cz/media/filer_public_thumbnails/filer_public/03/33/033305d2-e8a1-42ca-aa8f-905df277309a/prednasky.jpg__1600x901_q85_subject_location-800%2C450_subsampling-2.jpg',
+    alt: 'Přednáška a odborná exkurze'
+  },
+  {
+    title: 'Praxe ve firmách',
+    text: 'Na konci třetího a v průběhu celého čtvrtého ročníku absolvují žáci oboru IT odbornou praxi ve firmách nebo institucích a zdokonalují své odborné i komunikační dovednosti.',
+    image: 'https://www.sspu-opava.cz/media/filer_public_thumbnails/filer_public/38/56/3856a737-e869-4e40-9fd2-9d212d8e4f9c/it-odborna-praxe.jpg__1600x900_q85_subject_location-800%2C450_subsampling-2.jpg',
+    alt: 'Odborná praxe studentů IT'
+  },
+  {
+    title: 'Závěrečné práce',
+    text: 'Studenti maturitního ročníku pracují na závěrečných projektech, která se nejčastěji zaměřují na programování, počítačové sítě nebo elektroniku a veřejně je obhajují.',
+    image: 'https://www.sspu-opava.cz/media/filer_public_thumbnails/filer_public/f1/76/f17676a3-e5dd-449f-8c2c-aca6becd8688/zaverecne-prace.jpg__1600x901_q85_subject_location-800%2C450_subsampling-2.jpg',
+    alt: 'Závěrečné práce studentů oboru informační technologie'
+  },
+  {
+    title: 'Maturity',
+    text: 'Profilovou část maturitní zkoušky tvoří komplexní praktická zkouška a dvě ústní zkoušky z programového vybavení a počítačových systémů. Studenti si mohou zvolit také maturitu z matematiky nebo angličtiny.',
+    image: 'https://www.sspu-opava.cz/media/filer_public_thumbnails/filer_public/a6/1f/a61fbf42-ecbe-4399-8434-76d406149e59/maturity2.jpg__1600x901_q85_subject_location-800%2C450_subsampling-2.jpg',
+    alt: 'Maturitní zkoušky studentů'
+  }
+];
+
+const subjects = [
+  {
+    title: 'Programové vybavení',
+    text: 'Studenti se učí vybírat, instalovat, konfigurovat a spravovat základní i aplikační software, pracovat s datovými formáty a poskytovat podporu uživatelům.',
+    image: 'https://www.sspu-opava.cz/media/filer_public_thumbnails/filer_public/a4/ba/a4babe23-1087-43e4-8fe6-4104e9ca0601/ucebna-informatiky-vyt303-01.jpg__1024.0x682.6666666666666_q85_crop-10_subject_location-800%2C533_subsampling-2_upscale.jpg',
+    alt: 'Učebna ICT a programování'
+  },
+  {
+    title: 'Programování počítačů',
+    text: 'Od algoritmů a datových typů se postupně dostanou k tvorbě aplikací, databázových řešení, webových stránek a práci ve vývojových prostředích.',
+    image: 'https://www.sspu-opava.cz/media/filer_public_thumbnails/filer_public/d7/98/d7985e69-6cd6-4799-90b3-206beb48a1ea/it-vlastni-projekty.jpg__1600x900_q85_subject_location-800%2C450_subsampling-2.jpg',
+    alt: 'Studenti při práci na programátorském projektu'
+  },
+  {
+    title: 'Operační systémy',
+    text: 'Naučí se volit vhodný operační systém, instalovat ho, konfigurovat, spravovat a zabezpečit data před zneužitím i zničením.',
+    image: 'https://www.sspu-opava.cz/media/filer_public_thumbnails/filer_public/ec/b9/ecb92b6d-72c8-4247-850f-845d271e7c6c/ucebna-cisco-01.jpg__1024.0x682.6666666666666_q85_crop-10_subject_location-800%2C533_subsampling-2_upscale.jpg',
+    alt: 'Učebna počítačových sítí'
+  },
+  {
+    title: 'Počítačové sítě',
+    text: 'Budou navrhovat, sestavovat, konfigurovat a spravovat počítačové sítě, síťové prvky i bezpečné připojení k lokální síti a internetu.',
+    image: 'https://www.sspu-opava.cz/media/filer_public_thumbnails/filer_public/ec/b9/ecb92b6d-72c8-4247-850f-845d271e7c6c/ucebna-cisco-01.jpg__1024.0x682.6666666666666_q85_crop-10_subject_location-800%2C533_subsampling-2_upscale.jpg',
+    alt: 'Laboratoř CISCO Academy'
+  },
+  {
+    title: 'Počítačová grafika',
+    text: 'Věnují se technickému kreslení, 3D modelování, animaci a tvorbě digitálního videa v profesionálních grafických nástrojích.',
+    image: 'https://www.sspu-opava.cz/media/filer_public_thumbnails/filer_public/61/51/61518e83-f284-4ea4-a9ee-2acc6a2ce816/pocitacova-grafika-vyt302-01.jpg__1024.0x682.6666666666666_q85_crop-10_subject_location-800%2C533_subsampling-2_upscale.jpg',
+    alt: 'Učebna počítačové grafiky'
+  },
+  {
+    title: 'Hardware',
+    text: 'Poznají jednotlivé součásti počítače, naučí se sestavovat a udržovat hardwarová řešení, hledat závady a provádět jejich základní upgrade.',
+    image: 'https://www.sspu-opava.cz/media/filer_public_thumbnails/filer_public/bb/7c/bb7c4a8c-574d-49e3-a519-b5774202c4e7/ucebna-mechatroniky-01.jpg__1024.0x682.6666666666666_q85_crop-10_subject_location-800%2C533_subsampling-2_upscale.jpg',
+    alt: 'Učebna mechatroniky a elektroniky'
+  },
+  {
+    title: 'Elektrotechnika',
+    text: 'Získají základy elektrotechniky, elektroniky, pneumatických obvodů a automatizace včetně praktických cvičení s programovatelnými automaty PLC.',
+    image: 'https://www.sspu-opava.cz/media/filer_public_thumbnails/filer_public/bb/7c/bb7c4a8c-574d-49e3-a519-b5774202c4e7/ucebna-mechatroniky-01.jpg__1024.0x682.6666666666666_q85_crop-10_subject_location-800%2C533_subsampling-2_upscale.jpg',
+    alt: 'Praktická výuka elektrotechniky'
+  },
+  {
+    title: 'Mechatronika a robotika',
+    text: 'Propojí elektroniku, mechaniku, automatizaci a programování při práci s průmyslovými robotickými rameny a dalšími moderními technologiemi.',
+    image: 'https://www.sspu-opava.cz/media/filer_public_thumbnails/filer_public/42/22/42221473-9d1f-4729-a825-b79454f8f8dc/ucebna-robotiky-01.jpg__1024.0x682.6666666666666_q85_crop-10_subject_location-800%2C533_subsampling-2_upscale.jpg',
+    alt: 'Učebna robotiky a automatizace'
+  }
+];
+
+const classrooms = [
+  {
+    image: 'https://www.sspu-opava.cz/media/filer_public_thumbnails/filer_public/61/51/61518e83-f284-4ea4-a9ee-2acc6a2ce816/pocitacova-grafika-vyt302-01.jpg__1024.0x682.6666666666666_q85_crop-10_subject_location-800%2C533_subsampling-2_upscale.jpg',
+    alt: 'Učebna počítačové grafiky'
+  },
+  {
+    image: 'https://www.sspu-opava.cz/media/filer_public_thumbnails/filer_public/bb/7c/bb7c4a8c-574d-49e3-a519-b5774202c4e7/ucebna-mechatroniky-01.jpg__1024.0x682.6666666666666_q85_crop-10_subject_location-800%2C533_subsampling-2_upscale.jpg',
+    alt: 'Učebna mechatroniky'
+  },
+  {
+    image: 'https://www.sspu-opava.cz/media/filer_public_thumbnails/filer_public/ec/b9/ecb92b6d-72c8-4247-850f-845d271e7c6c/ucebna-cisco-01.jpg__1024.0x682.6666666666666_q85_crop-10_subject_location-800%2C533_subsampling-2_upscale.jpg',
+    alt: 'Učebna počítačových sítí'
+  },
+  {
+    image: 'https://www.sspu-opava.cz/media/filer_public_thumbnails/filer_public/a4/ba/a4babe23-1087-43e4-8fe6-4104e9ca0601/ucebna-informatiky-vyt303-01.jpg__1024.0x682.6666666666666_q85_crop-10_subject_location-800%2C533_subsampling-2_upscale.jpg',
+    alt: 'Učebna ICT a programování'
+  },
+  {
+    image: 'https://www.sspu-opava.cz/media/filer_public_thumbnails/filer_public/42/22/42221473-9d1f-4729-a825-b79454f8f8dc/ucebna-robotiky-01.jpg__1024.0x682.6666666666666_q85_crop-10_subject_location-800%2C533_subsampling-2_upscale.jpg',
+    alt: 'Učebna robotiky'
+  },
+  {
+    image: 'https://www.sspu-opava.cz/media/filer_public_thumbnails/filer_public/79/c7/79c7bd7d-028c-4be1-afc7-baeca8e0d4de/it-odborna-vyuka.jpg__1600x900_q85_subject_location-800%2C450_subsampling-2.jpg',
+    alt: 'Odborná výuka oboru informační technologie'
+  }
+];
+
+---
+<section id="obor-content" class="container-page pb-14 sm:pb-20" data-pagefind-body>
+
+  <section aria-labelledby="it-why-title">
+    <h2 id="it-why-title" class="text-4xl font-black tracking-tight text-[#59BDDC] sm:text-5xl">Proč studovat informační technologie?</h2>
+    <div class="mt-8 grid gap-6 lg:grid-cols-2">
+      <article class="rounded-2xl bg-white p-6 sm:p-8">
+        <h3 class="text-2xl">Obor, který spojuje techniku a kreativitu</h3>
+        <p class="mt-4 text-base leading-8 text-ink/85 sm:text-lg">Patříme mezi desítku středních škol v České republice, na kterých byla před dvaceti lety zahájena výuka tohoto atraktivního oboru. Naši absolventi pracují jako programátoři, správci sítí, webdesignéři, analytici, grafici a další IT specialisté ve velkých nadnárodních společnostech i v regionálních firmách. V průběhu studia žáci získají nezbytné znalosti z oblasti hardwaru i softwaru, naučí se konfigurovat počítačové sítě a operační systémy, programovat v různých jazycích, vyvíjet webové aplikace, vytvářet grafické dokumenty i multimediální prezentace. Díky moderně vybaveným učebnám hlouběji proniknou také do světa elektroniky a mechatroniky.</p>
+      </article>
+      <article class="rounded-2xl bg-mist p-6 sm:p-8">
+        <h3 class="text-2xl">Možnosti uplatnění v praxi</h3>
+        <ul class="mt-5 space-y-3">
+          {careers.map((career) => <li class="flex gap-3 leading-7"><span class="mt-1 font-bold text-[#59BDDC]" aria-hidden="true">✓</span><span>{career}</span></li>)}
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section id="prubeh-studia" class="mt-20" aria-labelledby="it-study-title">
+    <h2 id="it-study-title" class="text-4xl font-black tracking-tight text-[#59BDDC] sm:text-5xl">Jak probíhá studium?</h2>
+    <div class="mt-8 grid gap-6 lg:grid-cols-2">
+      <article class="min-w-0">
+        <h3 class="text-2xl">Co mě čeká?</h3>
+        <div class="mt-5"><AccordionList id="it-study-accordion" items={studyItems} /></div>
+      </article>
+      <article class="min-w-0">
+        <h3 class="text-2xl">Co se naučím?</h3>
+        <div class="mt-5"><AccordionList id="it-subjects-accordion" items={subjects} /></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="mt-20" aria-labelledby="it-classrooms-title">
+    <h2 id="it-classrooms-title" class="text-4xl font-black tracking-tight text-[#59BDDC] sm:text-5xl">Kde se budu učit?</h2>
+    <div class="mt-8 grid gap-6 lg:grid-cols-2">
+      <article><h3 class="text-xl">Odborné učebny a laboratoře</h3><p class="mt-3 leading-7 text-ink/80">Výuka odborných předmětů probíhá ve specializovaných učebnách vybavených moderní technikou. Laboratoř CISCO Academy umožňuje simulovat provoz reálných počítačových sítí a poskytuje zázemí pro výuku operačních systémů a síťových technologií.</p></article>
+      <article><h3 class="text-xl">Technika pro tvorbu i automatizaci</h3><p class="mt-3 leading-7 text-ink/80">Počítačové učebny nabízejí vývojová prostředí, databázové systémy a nástroje pro tvorbu webu. V učebnách grafiky, elektroniky, mechatroniky a robotiky si studenti vyzkoušejí 3D modelování, animaci, PLC automaty i průmyslová robotická ramena.</p></article>
+    </div>
+    <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+      {classrooms.map((photo) => <figure class="overflow-hidden rounded-2xl bg-mist"><img src={photo.image} alt={photo.alt} class="aspect-[4/3] w-full object-cover transition duration-300 hover:scale-105" loading="lazy" decoding="async" /></figure>)}
+    </div>
+  </section>
+
+  {additionalBlocks.length > 0 && <div class="mt-20 border-t border-ink/10 pt-4"><ContentRenderer blocks={additionalBlocks} /></div>}
+</section>

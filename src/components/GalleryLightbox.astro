@@ -1,0 +1,63 @@
+---
+import ResponsiveImage from './ResponsiveImage.astro';
+import { withBase } from '../lib/content';
+interface Photo { src: string; alt: string; caption?: string }
+const { photos, title } = Astro.props as { photos: Photo[]; title: string };
+const renderedPhotos = photos.map(photo => ({ ...photo, src: withBase(photo.src) }));
+---
+<div data-gallery-instance>
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" data-gallery data-photos={JSON.stringify(renderedPhotos)}>
+    {renderedPhotos.map((photo, index) => <a href={photo.src} class="group relative overflow-hidden rounded-2xl bg-night text-left no-underline" data-gallery-open={index} aria-haspopup="dialog" aria-label={`Otevřít fotografii ${index + 1}: ${photo.alt}`}>
+      <ResponsiveImage src={photo.src} alt={photo.alt} sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" class="aspect-[4/3] w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" decoding="async" />
+      <span class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-night/95 to-night/20 px-4 pb-3 pt-12 text-sm font-bold text-white">{photo.caption || photo.alt}</span>
+    </a>)}
+  </div>
+  <dialog class="gallery-dialog m-auto w-[min(92vw,72rem)] rounded-2xl border-0 bg-night p-0 text-white shadow-2xl backdrop:bg-night/80" aria-label={`Galerie: ${title}`} data-gallery-dialog data-pagefind-ignore="all">
+    <div class="relative">
+      <img class="max-h-[70vh] w-full object-contain" alt="" data-gallery-image />
+      <button type="button" class="absolute right-3 top-3 grid h-11 w-11 place-items-center rounded-full bg-white text-2xl text-night" data-gallery-close aria-label="Zavřít galerii">×</button>
+      <div class="grid grid-cols-2 gap-3 p-4 sm:grid-cols-[auto_1fr_auto]">
+        <button class="button-secondary !px-3" type="button" data-gallery-prev>← Předchozí</button>
+        <p class="col-span-2 row-start-2 self-center text-center text-sm sm:col-span-1 sm:row-start-auto" aria-live="polite" data-gallery-caption></p>
+        <button class="button-secondary !px-3" type="button" data-gallery-next>Další →</button>
+      </div>
+    </div>
+  </dialog>
+</div>
+<script>
+  document.querySelectorAll<HTMLElement>('[data-gallery-instance]').forEach(instance => {
+    const root = instance.querySelector<HTMLElement>('[data-gallery]');
+    const photos = JSON.parse(root?.dataset.photos || '[]') as { src: string; alt: string; caption?: string }[];
+    const dialog = instance.querySelector<HTMLDialogElement>('[data-gallery-dialog]');
+    const image = instance.querySelector<HTMLImageElement>('[data-gallery-image]');
+    const caption = instance.querySelector<HTMLElement>('[data-gallery-caption]');
+    let active = 0;
+    let trigger: HTMLAnchorElement | null = null;
+    const update = () => {
+      const photo = photos[active];
+      if (!photo) return;
+      if (image) { image.src = photo.src; image.alt = photo.alt; }
+      if (caption) caption.textContent = `${active + 1} / ${photos.length} · ${photo.caption || photo.alt}`;
+    };
+    const move = (step: number) => { active = (active + step + photos.length) % photos.length; update(); };
+    root?.addEventListener('click', event => {
+      if (event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+      const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('[data-gallery-open]') : null;
+      if (!link || !dialog || !photos.length) return;
+      event.preventDefault();
+      trigger = link;
+      active = Number(link.dataset.galleryOpen);
+      update();
+      dialog.showModal();
+      dialog.querySelector<HTMLElement>('[data-gallery-close]')?.focus();
+    });
+    dialog?.querySelector('[data-gallery-close]')?.addEventListener('click', () => dialog.close());
+    dialog?.querySelector('[data-gallery-prev]')?.addEventListener('click', () => move(-1));
+    dialog?.querySelector('[data-gallery-next]')?.addEventListener('click', () => move(1));
+    dialog?.addEventListener('keydown', event => {
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); move(event.key === 'ArrowLeft' ? -1 : 1); }
+    });
+    dialog?.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
+    dialog?.addEventListener('close', () => { image?.removeAttribute('src'); trigger?.focus(); });
+  });
+</script>

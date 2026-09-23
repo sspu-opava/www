@@ -1,0 +1,24 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/content/PageHero.astro';
+import SearchMetadata from '../../components/content/SearchMetadata.astro';
+import AttachmentLink from '../../components/content/AttachmentLink.astro';
+import { entries, formatDate, routeFor, withBase } from '../../lib/content';
+export async function getStaticPaths() { return (await entries('documents')).map(document => ({ params: { slug: document.id }, props: { document } })); }
+const { document } = Astro.props;
+const data = document.data;
+const pages = (await entries('pages')).filter(page => data.pages.includes(page.id));
+const url = new URL(withBase(routeFor('documents', document.id)), Astro.site).href;
+const schema = { '@context': 'https://schema.org', '@type': 'DigitalDocument', name: data.title, description: data.description, url, datePublished: data.date.toISOString(), encoding: { '@type': 'MediaObject', contentUrl: new URL(withBase(data.file), Astro.site).href } };
+---
+<BaseLayout title={data.title} description={data.description} seo={data.seo} schema={schema} breadcrumbs={[{ label: 'Dokumenty', href: '/dokumenty/' }, { label: data.title }]}>
+  <PageHero eyebrow="Dokumenty" title={data.title} description={data.description} decorativeArt={false} />
+  <SearchMetadata type="Dokument" programs={data.programs} categories={[data.category]} tags={data.tags} year={data.date.getFullYear()} />
+  <article class="container-page pb-16">
+    <h2 class="text-2xl">Soubor ke stažení</h2>
+    <p class="mt-4">{data.category} · Vydáno <time datetime={data.date.toISOString()}>{formatDate(data.date)}</time></p>
+    {data.validUntil && <p class="mt-2">Platnost do <time datetime={data.validUntil.toISOString()}>{formatDate(data.validUntil)}</time>.</p>}
+    <AttachmentLink label={data.title} url={data.file} description={data.description} class="button-primary mt-6">Otevřít dokument</AttachmentLink>
+    {pages.length > 0 && <section class="mt-10"><h2 class="text-2xl">Související informace</h2><ul class="mt-4 space-y-3">{pages.map(page => <li><a href={withBase(routeFor('pages', page.id))}>{page.data.title}</a></li>)}</ul></section>}
+  </article>
+</BaseLayout>

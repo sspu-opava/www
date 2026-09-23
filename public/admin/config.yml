@@ -1,0 +1,341 @@
+local_backend: true
+backend:
+  name: git-gateway
+  branch: main
+media_folder: public/uploads
+public_folder: /uploads
+publish_mode: simple
+collections:
+  - name: articles
+    label: Aktuality
+    folder: src/content/articles
+    create: true
+    slug: "{{slug}}"
+    extension: md
+    fields:
+      - { label: Titulek, name: title, widget: string }
+      - { label: Perex, name: description, widget: text }
+      - { label: Datum publikace, name: publishedAt, widget: datetime }
+      - { label: Datum úpravy, name: updatedAt, widget: datetime, required: false }
+      - { label: Autor, name: author, widget: string }
+      - { label: Kategorie, name: categories, widget: list, default: [] }
+      - { label: Štítky, name: tags, widget: list, required: false }
+      - label: Studijní obory
+        name: programs
+        widget: relation
+        collection: programs
+        search_fields: [title]
+        value_field: "{{slug}}"
+        display_fields: [title]
+        multiple: true
+        required: false
+      - { label: Titulní obrázek, name: cover, widget: image, required: false }
+      - label: Související galerie
+        name: gallery
+        widget: relation
+        collection: galleries
+        search_fields: [title]
+        value_field: "{{slug}}"
+        display_fields: [title]
+        required: false
+      - label: Doporučené články
+        name: related
+        widget: relation
+        collection: articles
+        search_fields: [title]
+        value_field: "{{slug}}"
+        display_fields: [title]
+        multiple: true
+        required: false
+      - label: Zobrazení na titulní stránce
+        name: homepage
+        widget: object
+        collapsed: true
+        fields:
+          - { label: Zobrazit v hlavním zpravodaji, name: featured, widget: boolean, default: false }
+          - { label: Pořadí na titulní stránce, name: order, widget: number, value_type: int, default: 0 }
+      - label: Přílohy
+        name: attachments
+        widget: list
+        required: false
+        fields:
+          - { label: Název, name: label, widget: string }
+          - { label: Soubor nebo URL, name: url, widget: file }
+      - { label: Stav, name: status, widget: select, options: [published, draft], default: published }
+      - { label: Obsah, name: body, widget: markdown }
+  - name: programs
+    label: Studijní obory
+    folder: src/content/programs
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: Název, name: title, widget: string }
+      - { label: Kód oboru, name: code, widget: string }
+      - { label: Forma studia, name: form, widget: string }
+      - { label: Kapacita, name: capacity, widget: number, value_type: int }
+      - { label: Stručný popis, name: description, widget: text }
+      - { label: Titulní obrázek, name: heroImage, widget: image, required: false }
+      - { label: Hlavní body studia, name: highlights, widget: list }
+      - { label: Možné profese, name: careers, widget: list }
+      - { label: Stav, name: status, widget: select, options: [published, draft], default: published }
+      - { label: Detail oboru, name: body, widget: markdown }
+  - name: galleries
+    label: Galerie
+    folder: src/content/galleries
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: Název, name: title, widget: string }
+      - { label: Popis, name: description, widget: text }
+      - { label: Datum, name: date, widget: datetime }
+      - { label: Titulní obrázek, name: cover, widget: image }
+      - label: Fotografie
+        name: photos
+        widget: list
+        fields:
+          - { label: Fotografie, name: src, widget: image }
+          - { label: ALT text, name: alt, widget: string, hint: Popište obsah snímku. }
+          - { label: Popisek, name: caption, widget: string, required: false }
+      - { label: Obory, name: programs, widget: list, required: false }
+      - { label: Kategorie, name: categories, widget: list, required: false }
+      - { label: Štítky, name: tags, widget: list, required: false }
+      - { label: Stav, name: status, widget: select, options: [published, draft], default: published }
+      - { label: Poznámka pro redakci, name: body, widget: markdown, required: false }
+  - name: documents
+    label: Dokumenty
+    folder: src/content/documents
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: Název, name: title, widget: string }
+      - { label: Popis, name: description, widget: text }
+      - { label: Soubor, name: file, widget: file }
+      - { label: Kategorie, name: category, widget: string }
+      - { label: Datum, name: date, widget: datetime }
+      - { label: Platnost do, name: validUntil, widget: datetime, required: false }
+      - { label: Obory, name: programs, widget: list, required: false }
+      - { label: Štítky, name: tags, widget: list, required: false }
+      - { label: Stav, name: status, widget: select, options: [published, draft], default: published }
+  - name: projects
+    label: Projekty
+    folder: src/content/projects
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: Název projektu, name: title, widget: string }
+      - { label: URL identifikátor, name: slug, widget: string, hint: Malá písmena bez diakritiky, slova oddělujte pomlčkami. }
+      - { label: Stav projektu, name: status, widget: select, options: [active, completed, archived] }
+      - { label: Stav publikace, name: publicationStatus, widget: select, options: [published, draft], default: published }
+      - { label: Začátek realizace, name: startDate, widget: string, required: false }
+      - { label: Konec realizace, name: endDate, widget: string, required: false }
+      - { label: Program, name: programme, widget: string, required: false }
+      - { label: Výzva, name: call, widget: string, required: false }
+      - { label: Registrační číslo, name: registrationNumber, widget: string, required: false }
+      - { label: Číslo projektu, name: projectNumber, widget: string, required: false }
+      - { label: Financování, name: funding, widget: text, required: false }
+      - { label: Tematické oblasti, name: topics, widget: list, required: false }
+      - { label: Krátké shrnutí, name: summary, widget: text }
+      - { label: Zvýraznit v přehledu, name: featured, widget: boolean, default: false }
+      - { label: Hlavní obrázek, name: heroImage, widget: image, required: false }
+      - label: Galerie projektu
+        name: gallery
+        widget: list
+        required: false
+        fields:
+          - { label: Obrázek, name: src, widget: image }
+          - { label: ALT text, name: alt, widget: string }
+          - { label: Popisek, name: caption, widget: string, required: false }
+      - label: Partneři
+        name: partners
+        widget: list
+        required: false
+        fields:
+          - { label: Název partnera, name: name, widget: string }
+          - { label: Web partnera, name: url, widget: string, required: false }
+      - label: Související odkazy
+        name: links
+        widget: list
+        required: false
+        fields:
+          - { label: Název odkazu, name: label, widget: string }
+          - { label: URL nebo soubor, name: url, widget: string }
+          - { label: Typ odkazu, name: type, widget: select, options: [external, document, video], required: false }
+      - { label: Obsah projektu, name: body, widget: markdown, required: false }
+  - name: events
+    label: Kalendář akcí
+    folder: src/content/events
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: Název, name: title, widget: string }
+      - { label: Perex, name: excerpt, widget: text }
+      - { label: Datum začátku, name: startDate, widget: date, format: "YYYY-MM-DD" }
+      - { label: Čas začátku, name: startTime, widget: string, required: false, pattern: ["^([01]\\d|2[0-3]):[0-5]\\d$", "Použijte formát HH:mm."] }
+      - { label: Datum konce, name: endDate, widget: date, format: "YYYY-MM-DD", required: false }
+      - { label: Čas konce, name: endTime, widget: string, required: false, pattern: ["^([01]\\d|2[0-3]):[0-5]\\d$", "Použijte formát HH:mm."] }
+      - { label: Místo, name: location, widget: text, required: false }
+      - { label: Odkaz, name: url, widget: string, required: false }
+      - label: Štítky
+        name: tags
+        widget: select
+        multiple: true
+        options: [vystava, prace-zaku, uchazeci, maturanti, akce, soutez, prednaska, exkurze, prumyslovy-design, graficky-design, informacni-technologie, strojirenstvi, design-hracek]
+      - { label: Obory, name: programs, widget: list, required: false }
+      - label: Přílohy
+        name: attachments
+        widget: list
+        required: false
+        fields:
+          - { label: Soubor, name: file, widget: file }
+          - { label: Název odkazu, name: label, widget: string }
+          - { label: Popis, name: description, widget: text, required: false }
+      - label: Obsahové bloky
+        name: contentBlocks
+        widget: list
+        required: false
+        types:
+          - label: Upozornění
+            name: notice
+            widget: object
+            fields: [{ label: Typ, name: type, widget: hidden, default: notice }, { label: Titulek, name: title, widget: string }, { label: Text, name: text, widget: text }]
+          - label: Výzva k akci
+            name: cta
+            widget: object
+            fields: [{ label: Typ, name: type, widget: hidden, default: cta }, { label: Titulek, name: title, widget: string }, { label: Text, name: text, widget: text }, { label: Text odkazu, name: label, widget: string }, { label: Odkaz, name: href, widget: string }]
+      - { label: Stav, name: status, widget: select, options: [published, draft], default: published }
+  - name: people
+    label: Lidé
+    folder: src/content/people
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: Jméno, name: name, widget: string }
+      - { label: Tituly před jménem, name: titlesBefore, widget: string, required: false }
+      - { label: Tituly za jménem, name: titlesAfter, widget: string, required: false }
+      - { label: Funkce / pozice, name: position, widget: string }
+      - { label: Pracoviště, name: workplace, widget: string, required: false }
+      - { label: Telefon, name: phone, widget: string, required: false }
+      - { label: Telefonní čísla, name: phones, widget: list, required: false }
+      - { label: E-mail, name: email, widget: string }
+      - { label: Fotografie, name: photo, widget: image, required: false }
+      - { label: ALT fotografie, name: photoAlt, widget: string, required: false }
+      - { label: Ohnisko fotografie, name: photoFocalPoint, widget: string, required: false }
+      - { label: Starší krátký profil, name: profile, widget: text, required: false }
+      - { label: Obsahové bloky, name: contentBlocks, widget: list, required: false }
+      - { label: Studijní obory, name: studyFields, widget: list, required: false }
+      - { label: Skupiny, name: groups, widget: list, required: false }
+      - { label: Zobrazit v přehledu kontaktů, name: showInContacts, widget: boolean, default: false, required: false }
+      - { label: Stav, name: status, widget: select, options: [published, draft], default: published }
+  - name: jobOffers
+    label: Nabídky zaměstnání a brigád
+    folder: src/content/job-offers
+    create: true
+    slug: "{{slug}}"
+    media_folder: public/uploads/job-offers
+    public_folder: /uploads/job-offers
+    fields:
+      - { label: Název nabídky, name: title, widget: string }
+      - { label: URL identifikátor, name: slug, widget: string }
+      - { label: Firma, name: company, widget: string }
+      - { label: Web firmy, name: companyUrl, widget: string, required: false }
+      - { label: Pracovní pozice, name: position, widget: string }
+      - { label: Typ nabídky, name: type, widget: select, options: [job, brigade, internship, practice], default: job }
+      - { label: Stav nabídky, name: status, widget: select, options: [active, needs-review, closed, archived] }
+      - { label: Zobrazit veřejně, name: visible, widget: boolean, default: true }
+      - { label: Vyžaduje ověření aktuálnosti, name: needsReview, widget: boolean, default: false, required: false }
+      - { label: Lokalita, name: location, widget: string, required: false }
+      - { label: Pracovní vztah, name: employmentType, widget: string, required: false }
+      - { label: Oblast, name: field, widget: string, required: false }
+      - { label: Krátký popis pro kartu, name: summary, widget: text, required: false }
+      - { label: Datum zveřejnění, name: publishedAt, widget: date, required: false, format: "YYYY-MM-DD" }
+      - { label: Termín platnosti, name: expiresAt, widget: date, required: false, format: "YYYY-MM-DD" }
+      - { label: Zvýraznit v přehledu, name: featured, widget: boolean, default: false, required: false }
+      - { label: Hlavní odkaz pro reakci, name: applyUrl, widget: string, required: false }
+      - label: Přílohy nabídky
+        name: attachments
+        widget: list
+        required: false
+        fields:
+          - { label: Název přílohy, name: label, widget: string }
+          - { label: Soubor, name: file, widget: file }
+          - { label: Typ souboru, name: type, widget: string, required: false }
+      - label: Externí odkazy
+        name: sourceLinks
+        widget: list
+        required: false
+        fields:
+          - { label: Název odkazu, name: label, widget: string }
+          - { label: URL, name: url, widget: string }
+          - { label: Typ odkazu, name: type, widget: string, required: false }
+      - { label: Kontaktní e-mail, name: contactEmail, widget: string, required: false }
+      - { label: Kontaktní telefon, name: contactPhone, widget: string, required: false }
+      - { label: Podrobný text nabídky, name: body, widget: markdown, required: false }
+  - name: pages
+    label: Informační stránky
+    folder: src/content/pages
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: Název, name: title, widget: string }
+      - { label: Popis pro vyhledávače, name: description, widget: text }
+      - { label: Nadřazený popisek, name: eyebrow, widget: string, required: false }
+      - { label: Zvýrazněná informace, name: highlight, widget: text, required: false }
+      - label: Obsahové bloky
+        name: contentBlocks
+        widget: list
+        required: false
+        types:
+          - label: Upozornění
+            name: notice
+            widget: object
+            fields: [{ label: Typ, name: type, widget: hidden, default: notice }, { label: Titulek, name: title, widget: string }, { label: Text, name: text, widget: text }]
+          - label: Výzva k akci
+            name: cta
+            widget: object
+            fields: [{ label: Typ, name: type, widget: hidden, default: cta }, { label: Titulek, name: title, widget: string }, { label: Text, name: text, widget: text }, { label: Text odkazu, name: label, widget: string }, { label: Odkaz, name: href, widget: string }]
+          - label: Nadpis
+            name: heading
+            widget: object
+            fields: [{ label: Typ, name: type, widget: hidden, default: heading }, { label: Úroveň, name: level, widget: select, options: [h2, h3], default: h2 }, { label: Text, name: text, widget: string }]
+          - label: Text
+            name: text
+            widget: object
+            fields: [{ label: Typ, name: type, widget: hidden, default: text }, { label: Nadpis, name: title, widget: string, required: false }, { label: Text, name: text, widget: text }]
+          - label: Obrázek
+            name: image
+            widget: object
+            fields: [{ label: Typ, name: type, widget: hidden, default: image }, { label: Obrázek, name: image, widget: image }, { label: ALT text, name: alt, widget: string }, { label: Popisek, name: caption, widget: string, required: false }]
+          - label: YouTube video
+            name: youtube
+            widget: object
+            fields: [{ label: Typ, name: type, widget: hidden, default: youtube }, { label: URL videa, name: url, widget: string }, { label: Popisek, name: title, widget: string, required: false }]
+          - label: Přílohy ke stažení
+            name: downloads
+            widget: object
+            fields:
+              - { label: Typ, name: type, widget: hidden, default: downloads }
+              - { label: Nadpis, name: title, widget: string, required: false }
+              - label: Soubory
+                name: items
+                widget: list
+                fields: [{ label: Název, name: label, widget: string }, { label: Soubor nebo URL, name: url, widget: file }, { label: Popis, name: description, widget: text, required: false }]
+          - label: Odkazy a dokumenty
+            name: links
+            widget: object
+            fields:
+              - { label: Typ, name: type, widget: hidden, default: links }
+              - { label: Nadpis, name: title, widget: string, required: false }
+              - label: Odkazy
+                name: items
+                widget: list
+                fields:
+                  - { label: Název odkazu, name: label, widget: string }
+                  - { label: URL nebo soubor, name: url, widget: string }
+                  - { label: Popis, name: description, widget: text, required: false }
+                  - { label: Typ odkazu, name: kind, widget: select, options: [external, document], default: external }
+          - label: FAQ
+            name: faq
+            widget: object
+            fields: [{ label: Typ, name: type, widget: hidden, default: faq }, { label: Otázky a odpovědi, name: items, widget: list, fields: [{ label: Otázka, name: question, widget: string }, { label: Odpověď, name: answer, widget: text }] }]
+      - { label: Stav, name: status, widget: select, options: [published, draft], default: published }
+      - { label: Textový obsah, name: body, widget: markdown }

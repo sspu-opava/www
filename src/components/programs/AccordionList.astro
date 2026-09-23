@@ -1,0 +1,44 @@
+---
+import { withBase } from '../../lib/content';
+
+interface AccordionItem {
+  title: string;
+  text: string;
+  image: string;
+  alt: string;
+}
+
+interface Props {
+  id: string;
+  items: AccordionItem[];
+}
+
+const { id, items } = Astro.props as Props;
+---
+
+<div id={id} data-accordion-list class="divide-y divide-ink/10 border-y border-ink/10">
+  {items.map((item, index) => <details class="group" name={id} open={index === 0}>
+    <summary class="flex cursor-pointer list-none items-center justify-between gap-5 py-5 text-left font-bold text-night marker:hidden">
+      <span>{item.title}</span>
+      <span class="shrink-0 text-2xl font-light leading-none text-[#59BDDC] transition-transform duration-200 group-open:rotate-45" aria-hidden="true">+</span>
+    </summary>
+    <div class="pb-8">
+      <p class="max-w-3xl text-base leading-8 text-ink/80">{item.text}</p>
+      <img src={withBase(item.image)} alt={item.alt} class="mt-6 aspect-[16/9] w-full rounded-2xl object-cover" loading="lazy" decoding="async" />
+    </div>
+  </details>)}
+</div>
+
+<script>
+  document.querySelectorAll('[data-accordion-list]').forEach((accordion) => {
+    const items = accordion.querySelectorAll('details');
+    items.forEach((item) => {
+      item.addEventListener('toggle', () => {
+        if (!item.open) return;
+        items.forEach((other) => {
+          if (other !== item) other.open = false;
+        });
+      });
+    });
+  });
+</script>

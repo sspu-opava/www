@@ -1,0 +1,34 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtemp, mkdir, readFile, readdir, rm } from 'node:fs/promises';
+import { resolve, join, sep } from 'node:path';
+import sharp from 'sharp';
+import matter from 'gray-matter';
+import { createGallery } from '../scripts/lib/gallery.mjs';
+test('gallery helper preserves sources, naturally sorts and refuses overwrite', async t => {
+  sharp.cache(false);
+  const parent = resolve('.audit-tmp');
+  await mkdir(parent, { recursive: true });
+  const root = await mkdtemp(join(parent, 'gallery-test-'));
+  t.after(async () => {
+    const checked = resolve(root);
+    if (!checked.startsWith(parent + sep) || !checked.startsWith(join(parent, 'gallery-test-'))) throw new Error('Unexpected cleanup target.');
+    await rm(checked, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+  });
+  const source = join(root, 'source'); await mkdir(source);
+  const bytes = await sharp({ create: { width: 600, height: 2000, channels: 3, background: '#abcdef' } }).png().toBuffer();
+  for (const name of ['foto10.png', 'foto2.png']) await sharp(bytes).toFile(join(source, name));
+  const gallery = await createGallery({ source, slug: 'zkouska', title: 'Výstava: "A"\nDruhý řádek', root });
+  const data = matter(await readFile(gallery.metadata, 'utf8')).data;
+  assert.equal(data.status, 'draft');
+  assert.equal(data.photos.length, 2);
+  assert.match(data.photos[0].alt, /foto2/);
+  assert.equal(data.title, 'Výstava: "A"\nDruhý řádek');
+  const dimensions = await sharp(join(gallery.target, '001.webp')).metadata();
+  assert.equal(dimensions.height, 1600);
+  const original = await readFile(join(source, 'foto2.png'));
+  assert.deepEqual(original, await readFile(join(source, 'foto10.png')));
+  await assert.rejects(createGallery({ source, slug: 'zkouska', root }), /už existuje/);
+  assert.equal((await readdir(gallery.target)).length, 2);
+  await assert.rejects(createGallery({ source, slug: '../escape', root }), /slug/);
+});

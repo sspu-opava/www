@@ -1,0 +1,44 @@
+---
+import type { ProjectEntry } from '../../lib/projects';
+import { projectPeriod, projectStatusClass, projectStatusLabel, projectYears } from '../../lib/projects';
+import { routeFor, withBase } from '../../lib/content';
+import ProjectMeta from './ProjectMeta.astro';
+
+interface Props {
+  project: ProjectEntry;
+}
+
+const { project } = Astro.props as Props;
+const data = project.data;
+const href = withBase(routeFor('projects', project.id));
+const years = projectYears(data);
+const searchable = [data.title, data.summary, data.programme, data.call, ...data.topics].filter(Boolean).join(' ');
+---
+
+<article
+  class="project-card"
+  data-project-card
+  data-project-title={data.title}
+  data-project-status={data.status}
+  data-project-programme={data.programme ?? ''}
+  data-project-topics={data.topics.join('|')}
+  data-project-years={years.join('|')}
+  data-project-search={searchable}
+>
+  <a href={href} class="project-card-media no-underline" aria-label={`Detail projektu: ${data.title}`}>
+    {data.heroImage
+      ? <img src={withBase(data.heroImage)} alt={data.title} loading="lazy" />
+      : <span class="project-card-fallback" aria-hidden="true"><span>{data.title}</span></span>}
+  </a>
+  <div class="project-card-body">
+    <div class="flex flex-wrap items-center gap-2">
+      <span class:list={['project-status', projectStatusClass(data.status)]}>{projectStatusLabel(data.status)}</span>
+      <span class="project-card-period">{projectPeriod(data)}</span>
+    </div>
+    <h3 class="project-card-title"><a href={href} class="no-underline hover:text-brand">{data.title}</a></h3>
+    {data.programme && <p class="project-card-programme">{data.programme}</p>}
+    <p class="project-card-summary">{data.summary}</p>
+    <ProjectMeta project={project} compact />
+    <a href={href} class="button-secondary mt-5 self-start">Detail projektu</a>
+  </div>
+</article>

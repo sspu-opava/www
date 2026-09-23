@@ -1,0 +1,151 @@
+---
+import { withBase } from '../../lib/content';
+
+interface MediaImage {
+  src: string;
+  alt: string;
+}
+
+interface MediaVideo {
+  src: string;
+  title: string;
+}
+
+interface MediaLink {
+  label: string;
+  href: string;
+}
+
+interface ProgramMedia {
+  profileImage: MediaImage;
+  gallery: MediaImage[];
+  videos: MediaVideo[];
+  links: MediaLink[];
+}
+
+interface Props {
+  programId: string;
+  programTitle: string;
+}
+
+const mediaRoot = '/uploads/program-media';
+const officialPdf = 'https://www.sspu-opava.cz/media/filer_public/d8/5e/d85eb22c-731e-41ec-b8ee-9f807dab7bd3/letak_sspu_opava_2025_26.pdf';
+const studyPreparation = 'https://www.sspu-opava.cz/cs/jak-se-pripravit-ke-studiu-na-umeleckych-oborech';
+const admissions = '/prijimaci-rizeni-umelecke-obory/';
+
+function galleryImages(programId: string, count: number, label: string): MediaImage[] {
+  return Array.from({ length: count }, (_, index) => {
+    const number = String(index + 1).padStart(2, '0');
+    return {
+      src: `${mediaRoot}/${programId}/gallery-${number}.webp`,
+      alt: `${label} – studentská práce ${index + 1}`
+    };
+  });
+}
+
+const programMedia: Record<string, ProgramMedia> = {
+  'design-hracek': {
+    profileImage: {
+      src: `${mediaRoot}/design-hracek/profile.webp`,
+      alt: 'Design hraček – profilový banner oboru'
+    },
+    gallery: [],
+    videos: [],
+    links: [
+      { label: 'Studium na uměleckých oborech', href: studyPreparation },
+      { label: 'Školní vzdělávací plán', href: 'https://www.sspu-opava.cz/static/documents/svp_hracka.pdf' },
+      { label: 'Přijímací řízení', href: admissions },
+      { label: 'Informace pro uchazeče', href: officialPdf },
+      { label: 'Přehled článků', href: '/aktuality/?program=design-hracek' }
+    ]
+  },
+  'prumyslovy-design': {
+    profileImage: {
+      src: `${mediaRoot}/prumyslovy-design/profile.webp`,
+      alt: 'Průmyslový design – profilový banner oboru'
+    },
+    gallery: galleryImages('prumyslovy-design', 28, 'Průmyslový design'),
+    videos: [
+      { src: 'https://player.vimeo.com/video/800329363?app_id=122963&h=fd7426006a', title: 'Návštěva ateliéru průmyslového designu – 1. část' },
+      { src: 'https://player.vimeo.com/video/695224351?app_id=122963&h=81007d0754', title: 'Návštěva ateliéru průmyslového designu – 2. část' }
+    ],
+    links: [
+      { label: 'Studium na uměleckých oborech', href: studyPreparation },
+      { label: 'Školní vzdělávací plán', href: 'https://www.sspu-opava.cz/static/documents/svp_prumyslovy_design.pdf' },
+      { label: 'Přijímací řízení', href: admissions },
+      { label: 'Informace pro uchazeče', href: officialPdf },
+      { label: 'Přehled článků', href: '/aktuality/?program=prumyslovy-design' }
+    ]
+  },
+  'graficky-design': {
+    profileImage: {
+      src: `${mediaRoot}/graficky-design/profile.webp`,
+      alt: 'Grafický design – profilový banner oboru'
+    },
+    gallery: galleryImages('graficky-design', 61, 'Grafický design'),
+    videos: [
+      { src: 'https://player.vimeo.com/video/807705271?app_id=122963&h=4be83df270', title: 'Návštěva ateliéru grafického designu' }
+    ],
+    links: [
+      { label: 'Studium na uměleckých oborech', href: studyPreparation },
+      { label: 'Školní vzdělávací plán', href: 'https://www.sspu-opava.cz/static/documents/svp_graficky_design.pdf' },
+      { label: 'Přijímací řízení', href: admissions },
+      { label: 'Informace pro uchazeče', href: officialPdf },
+      { label: 'Přehled článků', href: '/aktuality/?program=graficky-design' }
+    ]
+  }
+};
+
+const { programId, programTitle } = Astro.props as Props;
+const media = programMedia[programId];
+const external = (href: string) => href.startsWith('http');
+---
+
+{media && <section class="container-page pb-14 sm:pb-20" aria-labelledby={`${programId}-media-title`}>
+  <div class="rounded-3xl bg-white p-6 shadow-soft sm:p-8 lg:p-10">
+    <p class="eyebrow">Obor v obrazech</p>
+    <div class="mt-2 flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <h2 id={`${programId}-media-title`} class="text-3xl sm:text-4xl">Ukázky oboru a důležité odkazy</h2>
+        <p class="mt-3 max-w-3xl leading-7 text-ink/75">Prohlédněte si obrazové materiály, videa z ateliérů a informace, které byly dostupné na původní stránce oboru {programTitle}.</p>
+      </div>
+    </div>
+
+    <nav class="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-label={`Odkazy k oboru ${programTitle}`}>
+      {media.links.map((link) => <a
+        href={withBase(link.href)}
+        target={external(link.href) ? '_blank' : undefined}
+        rel={external(link.href) ? 'noopener noreferrer' : undefined}
+        class="card flex min-h-14 items-center justify-between gap-3 border-l-4 border-l-school-cyan p-4 text-sm font-bold no-underline transition hover:-translate-y-0.5 hover:shadow-soft"
+      >
+        <span>{link.label}</span><span aria-hidden="true" class="text-lg text-school-cyan">↗</span>
+      </a>)}
+    </nav>
+
+    <figure class="mt-10 overflow-hidden rounded-3xl bg-mist">
+      <img src={withBase(media.profileImage.src)} alt={media.profileImage.alt} class="aspect-[1600/600] w-full object-cover" loading="lazy" decoding="async" />
+      <figcaption class="px-5 py-3 text-sm leading-6 text-ink/70">Profil oboru {programTitle}</figcaption>
+    </figure>
+
+    {media.videos.length > 0 && <section class="mt-12" aria-labelledby={`${programId}-videos-title`}>
+      <p class="section-label">Návštěva ateliéru</p>
+      <h3 id={`${programId}-videos-title`} class="mt-2 text-2xl sm:text-3xl">Podívejte se, jak výuka probíhá</h3>
+      <div class="mt-6 grid gap-6 lg:grid-cols-2">
+        {media.videos.map((video) => <figure class="overflow-hidden rounded-2xl bg-night shadow-soft">
+          <iframe class="aspect-video w-full border-0" src={video.src} title={video.title} loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+          <figcaption class="px-5 py-4 text-sm leading-6 text-white/80">{video.title}</figcaption>
+        </figure>)}
+      </div>
+    </section>}
+
+    {media.gallery.length > 0 && <section class="mt-12" aria-labelledby={`${programId}-gallery-title`}>
+      <p class="section-label">Studentské práce</p>
+      <h3 id={`${programId}-gallery-title`} class="mt-2 text-2xl sm:text-3xl">Galerie {programTitle.toLocaleLowerCase('cs-CZ')}</h3>
+      <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        {media.gallery.map((image) => <figure class="group overflow-hidden rounded-2xl bg-mist">
+          <img src={withBase(image.src)} alt={image.alt} class="aspect-square w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" decoding="async" />
+        </figure>)}
+      </div>
+    </section>}
+  </div>
+</section>}

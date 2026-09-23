@@ -1,0 +1,71 @@
+---
+import { render } from 'astro:content';
+import type { EventEntry } from '../../lib/events';
+import ContentRenderer from '../content/ContentRenderer.astro';
+import EventAttachments from './EventAttachments.astro';
+import EventMeta from './EventMeta.astro';
+
+const { event } = Astro.props as { event: EventEntry };
+const { Content } = await render(event);
+const dialogId = `event-dialog-${event.id}`;
+---
+<dialog id={dialogId} class="event-dialog" data-event-dialog data-event-dialog-id={event.id} data-pagefind-ignore aria-labelledby={`${dialogId}-title`}>
+  <div class="event-dialog-shell">
+    <form method="dialog" class="event-dialog-close-form">
+      <button type="submit" class="event-dialog-close" aria-label="Zavřít detail události">×</button>
+    </form>
+    <div class="event-dialog-header">
+      <p class="eyebrow">Kalendář akcí</p>
+      <h2 id={`${dialogId}-title`} class="mt-3 text-3xl sm:text-4xl">{event.data.title}</h2>
+      <p class="mt-4 text-base leading-7 text-ink/75">{event.data.excerpt}</p>
+      <EventMeta event={event} />
+    </div>
+    <div class="event-dialog-body">
+      <ContentRenderer blocks={event.data.contentBlocks}><Content /></ContentRenderer>
+      <EventAttachments attachments={event.data.attachments} />
+    </div>
+  </div>
+</dialog>
+
+<script>
+  const dialogs = [...document.querySelectorAll<HTMLDialogElement>('[data-event-dialog]')];
+  const dialogById = new Map(dialogs.map((dialog) => [dialog.dataset.eventDialogId, dialog]));
+  let lastTrigger: HTMLElement | null = null;
+
+  const setEventUrl = (id: string | null) => {
+    const url = new URL(window.location.href);
+    if (id) url.searchParams.set('event', id);
+    else url.searchParams.delete('event');
+    window.history.replaceState({}, '', url);
+  };
+
+  const openDialog = (id: string, trigger?: HTMLElement | null, updateUrl = true) => {
+    const dialog = dialogById.get(id);
+    if (!dialog) return false;
+    if (!dialog.open) dialog.showModal();
+    lastTrigger = trigger ?? null;
+    document.body.classList.add('event-dialog-open');
+    if (updateUrl) setEventUrl(id);
+    return true;
+  };
+
+  document.addEventListener('click', (event) => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const target = event.target;
+    const trigger = target instanceof Element ? target.closest<HTMLElement>('[data-event-open]') : null;
+    if (!trigger) return;
+    const id = trigger.dataset.eventOpen;
+    if (!id || !openDialog(id, trigger)) return;
+    event.preventDefault();
+  });
+
+  dialogs.forEach((dialog) => dialog.addEventListener('close', () => {
+    document.body.classList.remove('event-dialog-open');
+    setEventUrl(null);
+    lastTrigger?.focus();
+    lastTrigger = null;
+  }));
+
+  const initialEvent = new URL(window.location.href).searchParams.get('event');
+  if (initialEvent) openDialog(initialEvent, null, false);
+</script>

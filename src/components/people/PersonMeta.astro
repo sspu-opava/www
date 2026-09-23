@@ -1,0 +1,49 @@
+---
+import type { PersonEntry } from '../../lib/people';
+import { getPersonPhones, getPersonStudyFields, getPersonWorkplace, getPhoneHref } from '../../lib/people';
+import { entries, withBase } from '../../lib/content';
+
+interface Props {
+  person: PersonEntry;
+  showWorkplace?: boolean;
+  showPhone?: boolean;
+  phoneLimit?: number;
+  showStudyFields?: boolean;
+  compact?: boolean;
+}
+
+const {
+  person,
+  showWorkplace = true,
+  showPhone = true,
+  phoneLimit,
+  showStudyFields = false,
+  compact = false
+} = Astro.props as Props;
+const data = person.data;
+const workplace = getPersonWorkplace(data);
+const phones = getPersonPhones(data);
+const studyFields = getPersonStudyFields(data);
+const programs = showStudyFields && studyFields.length > 0 ? await entries('programs') : [];
+const programById = new Map(programs.map((program) => [program.id, program]));
+---
+
+<div class:list={["person-meta", compact && "person-meta-compact"]}>
+  {showWorkplace && workplace && <span class="person-meta-workplace">{workplace}</span>}
+  <span class="person-meta-item">
+    <svg class="person-meta-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 6.5h17v11h-17v-11Zm0 .5 8.5 6 8.5-6" /></svg>
+    <a class="person-meta-link" href={`mailto:${data.email}`}>{data.email}</a>
+  </span>
+  {showPhone && phones.slice(0, phoneLimit ?? phones.length).map((phone) => <span class="person-meta-item">
+    <svg class="person-meta-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 3.5 8.8 3a1.5 1.5 0 0 1 1.7.9l1.1 2.7a1.5 1.5 0 0 1-.3 1.6L10 9.5a12.2 12.2 0 0 0 4.5 4.5l1.3-1.3a1.5 1.5 0 0 1 1.6-.3l2.7 1.1a1.5 1.5 0 0 1 .9 1.7l-.5 2.2a1.8 1.8 0 0 1-1.8 1.4C11.2 18.4 5.6 12.8 5.2 5.3a1.8 1.8 0 0 1 1.4-1.8Z" /></svg>
+    <a class="person-meta-link" href={getPhoneHref(phone)}>{phone}</a>
+  </span>)}
+  {showStudyFields && studyFields.length > 0 && <div class="person-meta-fields" aria-label="Studijní obory">
+    {studyFields.map((field) => {
+      const program = programById.get(field);
+      return program
+        ? <a class="person-field-tag" href={withBase(`/obory/${program.id}/`)}>{program.data.title}</a>
+        : <span class="person-field-tag">{field}</span>;
+    })}
+  </div>}
+</div>

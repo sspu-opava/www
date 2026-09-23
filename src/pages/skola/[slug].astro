@@ -1,0 +1,26 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ContentRenderer from '../../components/content/ContentRenderer.astro';
+import PageHero from '../../components/content/PageHero.astro';
+import { entries } from '../../lib/content';
+import { heroImages } from '../../data/heroImages';
+export async function getStaticPaths() { return (await entries('pages')).filter((page) => !page.id.startsWith('dokumenty-') && page.id !== 'zaci-tridy').map((page) => ({ params: { slug: page.id }, props: { page } })); }
+const { page } = Astro.props;
+const { Content } = await render(page);
+const pageHeroIcons: Record<string, string> = {
+  'o-skole': heroImages.history,
+  uchazeci: heroImages.admissions,
+  'pro-studenty': heroImages.students,
+  'historie-soucasnost': heroImages.history,
+  'umelecka-rada': heroImages.artisticCouncil,
+  'studentsky-parlament': heroImages.studentParliament,
+  spoluprace: heroImages.cooperation,
+  'nabidka-pronajmu': heroImages.rental,
+  'prijimaci-rizeni-technicke-obory': heroImages.admissions,
+  'prijimaci-rizeni-umelecke-obory': heroImages.admissions,
+  spp: heroImages.students
+};
+const heroIcon = pageHeroIcons[page.id];
+---
+<BaseLayout title={page.data.title} description={page.data.description} seo={page.data.seo} breadcrumbs={[{ label: 'Škola', href: '/skola/o-skole/' }, { label: page.data.title }]}><PageHero eyebrow={page.data.eyebrow ?? 'Škola'} title={page.data.title} description={page.data.highlight} accent={heroIcon ? '#59BDDC' : '#1A4053'} icon={heroIcon} iconBackground="#001731" variant={page.id === 'historie-soucasnost' ? 'history' : 'default'} /><article class="container-page pb-14 sm:pb-20" data-pagefind-body><span class="sr-only" data-pagefind-filter="typ">Stránka</span><div class="mt-10"><ContentRenderer blocks={page.data.contentBlocks}><Content /></ContentRenderer></div></article></BaseLayout>

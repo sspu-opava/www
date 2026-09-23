@@ -1,0 +1,17 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleDetail from '../../components/news/ArticleDetail.astro';
+import RelatedArticles from '../../components/news/RelatedArticles.astro';
+import ContentRenderer from '../../components/content/ContentRenderer.astro';
+import { entries, withBase } from '../../lib/content';
+export async function getStaticPaths() { return (await entries('articles')).map((article) => ({ params: { slug: article.id }, props: { article } })); }
+const { article } = Astro.props;
+const { Content } = await render(article);
+const allArticles = await entries('articles');
+const schema = { '@context': 'https://schema.org', '@type': 'NewsArticle', headline: article.data.title, description: article.data.description, datePublished: article.data.publishedAt.toISOString(), dateModified: (article.data.updatedAt ?? article.data.publishedAt).toISOString(), author: { '@type': article.data.author === 'Redakce školy' ? 'Organization' : 'Person', name: article.data.author }, publisher: { '@type': 'EducationalOrganization', name: 'SŠPU Opava' }, mainEntityOfPage: new URL(withBase(`/aktuality/${article.id}/`), Astro.site).href, ...(article.data.cover ? { image: new URL(withBase(article.data.cover), Astro.site).href } : {}) };
+---
+<BaseLayout title={article.data.title} description={article.data.description} seo={article.data.seo} image={article.data.cover} breadcrumbs={[{ label: 'Aktuality', href: '/aktuality/' }, { label: article.data.title }]} schema={schema}>
+  <ArticleDetail article={article}><ContentRenderer blocks={article.data.contentBlocks} legacyClass=""><Content /></ContentRenderer></ArticleDetail>
+  <aside data-pagefind-ignore><RelatedArticles article={article} articles={allArticles} /></aside>
+</BaseLayout>

@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import PageHero from '../../../../components/content/PageHero.astro';
+import GalleryGrid from '../../../../components/gallery/GalleryGrid.astro';
+import { entries } from '../../../../lib/content';
+import { heroImages } from '../../../../data/heroImages';
+
+const galleryIds = [
+  'klauzurni-prace-2-pololeti-2025',
+  'prezentace-maturitnich-praci-v-knihovne-petra-bezruce-opava-2025',
+  'vystava-maturitnich-praci-2025-v-knihovne-petra-bezruce-v-opave',
+  'klauzury-prvni-pololeti-2024-25-instalace',
+  'klauzury-prvni-pololeti-2024-25-vystava-pro-verejnost',
+  'dny-otevrenych-dveri-na-umeleckych-oborech-2024',
+  'klauzury-prvni-pololeti-2023-24-instalace',
+  'klauzury-prvni-pololeti-2023-24-obhajoby',
+  'klauzury-prvni-pololeti-2023-24-vystava-pro-verejnost'
+];
+const allGalleries = await entries('galleries');
+const galleries = galleryIds.map((id) => allGalleries.find((gallery) => gallery.id === id)).filter((gallery): gallery is (typeof allGalleries)[number] => Boolean(gallery));
+---
+<BaseLayout title="Fotogalerie uměleckých oborů" description="Fotografie z klauzurních prací, maturitních výstav a dalších aktivit uměleckých oborů SŠPU Opava." breadcrumbs={[{ label: 'Aktuálně', href: '/aktuality/' }, { label: 'Fotogalerie uměleckých oborů' }]}>
+  <PageHero eyebrow="Aktuálně · Galerie" title="Fotogalerie uměleckých oborů" description="Klauzurní práce, maturitní výstavy i dny otevřených dveří uměleckých oborů SŠPU Opava." accent="#ECAFAC" icon={heroImages.gallery} iconBackground="#001731" />
+  <section class="container-page pb-12 sm:pb-16" data-pagefind-body>
+    <span class="sr-only" data-pagefind-filter="typ">Fotogalerie uměleckých oborů</span>
+    <GalleryGrid galleries={galleries} />
+  </section>
+</BaseLayout>

@@ -1,0 +1,15 @@
+---
+import { mediaManifest as manifest } from '../lib/media';
+import { withBase } from '../lib/content';
+import { withoutBase } from '../lib/urls.mjs';
+interface Props {
+  src: string; alt: string; class?: string; style?: string;
+  width?: number; height?: number; sizes?: string;
+  loading?: 'eager' | 'lazy'; fetchpriority?: 'high' | 'low' | 'auto';
+  decoding?: 'async' | 'sync' | 'auto';
+}
+const { src, alt, sizes = '(min-width: 1024px) 50vw, 100vw', width, height, loading = 'lazy', decoding = 'async', ...attributes } = Astro.props;
+const media = manifest[withoutBase(src, import.meta.env.BASE_URL)];
+const fallback = media?.variants.find(variant => variant.width >= 960) || media?.variants.at(-1);
+---
+<img {...attributes} src={withBase(fallback?.src || src)} srcset={media?.variants.map(variant => withBase(variant.src) + ' ' + variant.width + 'w').join(', ')} sizes={media ? sizes : undefined} alt={alt} width={width || media?.width} height={height || media?.height} loading={loading} decoding={decoding} />

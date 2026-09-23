@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/content/PageHero.astro';
+import ContentRenderer from '../../components/content/ContentRenderer.astro';
+import SearchMetadata from '../../components/content/SearchMetadata.astro';
+import PersonMeta from '../../components/people/PersonMeta.astro';
+import { entries, withBase } from '../../lib/content';
+import { formatPersonName, getPersonPhoto, getPersonPosition, getPersonStudyFields, getPersonWorkplace } from '../../lib/people';
+export async function getStaticPaths() { return (await entries('people')).map(person => ({ params: { slug: person.id }, props: { person } })); }
+const { person } = Astro.props;
+const name = formatPersonName(person.data);
+const description = [getPersonPosition(person.data), getPersonWorkplace(person.data)].filter(Boolean).join(' · ');
+const photo = getPersonPhoto(person.data);
+const url = new URL(withBase(`/kontakt/${person.id}/`), Astro.site).href;
+const schema = { '@context': 'https://schema.org', '@type': 'Person', name, url, jobTitle: getPersonPosition(person.data), email: person.data.email, worksFor: { '@type': 'EducationalOrganization', name: 'SŠPU Opava' }, ...(photo ? { image: new URL(withBase(photo.src), Astro.site).href } : {}) };
+---
+<BaseLayout title={name} description={description} seo={person.data.seo} image={photo?.src} schema={schema} breadcrumbs={[{ label: 'Lidé a kontakty', href: '/kontakt/' }, { label: name }]}>
+  <PageHero eyebrow="Lidé a kontakty" title={name} description={description} decorativeArt={false} />
+  <SearchMetadata type="Osoba" programs={getPersonStudyFields(person.data)} />
+  <article class="container-page pb-16">
+    <div class:list={["grid gap-8", photo && "sm:grid-cols-[12rem_1fr]"]}>
+      {photo && <img src={withBase(photo.src)} alt={photo.alt} width="240" height="240" class="aspect-square w-48 rounded-2xl object-cover" />}
+      <section class="min-w-0"><h2 class="text-2xl">Kontaktní údaje</h2><PersonMeta person={person} showWorkplace showPhone showStudyFields /></section>
+    </div>
+    {(person.data.profile || person.data.contentBlocks.length > 0) && <section class="mt-10"><h2 class="text-2xl">Profil</h2><ContentRenderer blocks={person.data.contentBlocks}><p>{person.data.profile}</p></ContentRenderer></section>}
+  </article>
+</BaseLayout>

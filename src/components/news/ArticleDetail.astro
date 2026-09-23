@@ -1,0 +1,39 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { entries, formatDate, withBase } from '../../lib/content';
+import GalleryLightbox from '../GalleryLightbox.astro';
+import ArticleHero from './ArticleHero.astro';
+import AttachmentList from '../content/AttachmentList.astro';
+import SearchMetadata from '../content/SearchMetadata.astro';
+
+interface Props { article: CollectionEntry<'articles'> }
+const { article } = Astro.props;
+const galleries = await entries('galleries');
+const gallery = article.data.gallery ? galleries.find((item) => item.id === article.data.gallery) : undefined;
+---
+
+<article data-pagefind-body>
+  <ArticleHero article={article} />
+  <SearchMetadata type="Aktualita" programs={article.data.programs} categories={article.data.categories} tags={article.data.tags} year={article.data.publishedAt.getFullYear()} />
+  <div class="container-page pb-12 sm:pb-16">
+      <div class="flex flex-col gap-3 border-y border-ink/10 py-4 text-sm text-ink/75 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <a class="font-semibold text-ink no-underline hover:text-brand" href={withBase(`/aktuality/?author=${encodeURIComponent(article.data.author)}`)}>{article.data.author}</a>
+        <span aria-hidden="true" class="text-ink/35">·</span>
+        <a class="no-underline hover:text-brand" href={withBase(`/aktuality/?year=${article.data.publishedAt.getFullYear()}`)}><time datetime={article.data.publishedAt.toISOString()}>{formatDate(article.data.publishedAt, { day: 'numeric', month: 'numeric', year: 'numeric' })}</time></a>
+        {article.data.updatedAt && <><span aria-hidden="true" class="text-ink/35">·</span><span class="text-xs text-ink/60">Upraveno {formatDate(article.data.updatedAt, { day: 'numeric', month: 'numeric', year: 'numeric' })}</span></>}
+      </div>
+      <div class="flex flex-wrap gap-1.5 lg:justify-end">
+        {article.data.categories.length > 0 ? article.data.categories.map((category) => <a class="rounded-sm border border-ink/10 bg-mist px-2 py-1 text-xs font-semibold text-brand no-underline hover:border-school-cyan hover:bg-school-cyan/15" href={withBase(`/aktuality/?category=${encodeURIComponent(category)}`)}>{category}</a>) : <span class="rounded-sm border border-ink/10 bg-mist px-2 py-1 text-xs font-semibold text-brand">Aktualita</span>}
+      </div>
+    </div>
+    <div class="prose-school article-body-columns !max-w-none mt-10"><slot /></div>
+    {gallery && <section class="article-wide-section mt-12 border-t border-ink/10 pt-10" aria-labelledby={'article-gallery-' + article.id}>
+      <p class="eyebrow">Fotografie</p>
+      <h2 id={'article-gallery-' + article.id} class="mt-2 text-2xl">{gallery.data.title}</h2>
+      <p class="mt-3 max-w-3xl leading-7 text-ink/70">{gallery.data.description}</p>
+      <div class="mt-6"><GalleryLightbox photos={gallery.data.photos} title={gallery.data.title} /></div>
+    </section>}
+    <AttachmentList attachments={article.data.attachments} class="article-wide-section mx-auto mt-10 max-w-3xl rounded-2xl bg-mist p-6" />
+  </div>
+</article>

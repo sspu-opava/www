@@ -1,0 +1,53 @@
+---
+import type { EventEntry } from '../../lib/events';
+import { eventStartKey, eventDateKey } from '../../lib/events';
+import { withBase } from '../../lib/content';
+import EventDialog from './EventDialog.astro';
+import EventPreview, { type EventPreviewVariant } from './EventPreview.astro';
+
+interface Props {
+  title?: string;
+  eyebrow?: string;
+  description?: string;
+  events: EventEntry[];
+  variant?: EventPreviewVariant;
+  limit?: number;
+  tags?: string[];
+  programs?: string[];
+  from?: 'now' | string;
+  to?: string;
+  showMoreLink?: boolean;
+  showCalendarLink?: boolean;
+  emptyMessage?: string;
+  background?: 'paper' | 'mist';
+  embedded?: boolean;
+}
+
+const { title = 'Co se chystá', eyebrow, description, events, variant = 'homepage', limit = 5, tags = [], programs = [], from, to, showMoreLink = true, showCalendarLink = false, emptyMessage = 'Momentálně nejsou naplánované žádné události.', background = 'paper', embedded = false } = Astro.props;
+const today = eventDateKey(new Date());
+const filteredEvents = events
+  .filter((event) => tags.length === 0 || tags.some((tag) => event.data.tags.includes(tag)))
+  .filter((event) => programs.length === 0 || programs.some((program) => event.data.programs.includes(program)))
+  .filter((event) => !from || (event.data.endDate ?? event.data.startDate) >= (from === 'now' ? today : from))
+  .filter((event) => !to || event.data.startDate <= to)
+  .sort((a, b) => eventStartKey(a).localeCompare(eventStartKey(b)))
+  .slice(0, limit);
+---
+<section class:list={[!embedded && (background === 'mist' ? 'bg-mist py-16 sm:py-20' : 'py-12 sm:py-16'), `event-section-${variant}`, embedded && 'event-section-embedded']}>
+  <div class:list={[!embedded && 'container-page']}>
+    <div class="flex flex-wrap items-end justify-between gap-5">
+      <div>
+        {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+        {title && <h2 class:list={[eyebrow && 'mt-2']}>{title}</h2>}
+        {description && <p class="mt-3 max-w-2xl leading-7 text-ink/70">{description}</p>}
+      </div>
+      <div class="flex flex-wrap gap-3">
+        {showCalendarLink && <a class="button-secondary" href={withBase('/udalosti/')}>Kalendář akcí</a>}
+        {showMoreLink && <a class="button-secondary" href={withBase('/udalosti/')}>Všechny akce</a>}
+      </div>
+    </div>
+    {filteredEvents.length > 0 ? <div class="event-section-list mt-7">
+      {filteredEvents.map((event) => <div><EventPreview event={event} variant={variant} /><EventDialog event={event} /></div>)}
+    </div> : <p class="info-panel mt-7">{emptyMessage}</p>}
+  </div>
+</section>

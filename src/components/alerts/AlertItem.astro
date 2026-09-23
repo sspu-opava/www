@@ -1,0 +1,18 @@
+---
+import type { ResolvedHomepageAlert } from '../../data/alerts';
+import BannerAlert from './BannerAlert.astro';
+import TextAlert from './TextAlert.astro';
+
+interface Props { alert: ResolvedHomepageAlert }
+const { alert } = Astro.props;
+
+const gridClasses: Record<ResolvedHomepageAlert['desktopColumns'], string> = {
+  4: 'md:col-span-4',
+  6: 'md:col-span-6',
+  8: 'md:col-span-8'
+};
+---
+
+<article class:list={['min-w-0', gridClasses[alert.desktopColumns]]}>
+  {alert.variant === 'banner' ? <BannerAlert alert={alert} /> : <TextAlert alert={alert} />}
+</article>

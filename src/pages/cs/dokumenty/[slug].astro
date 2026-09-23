@@ -1,0 +1,30 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHero from '../../../components/content/PageHero.astro';
+import ContentRenderer from '../../../components/content/ContentRenderer.astro';
+import { entries } from '../../../lib/content';
+import { heroImages } from '../../../data/heroImages';
+
+export async function getStaticPaths() {
+  const pages = await entries('pages');
+  return pages
+    .filter((page) => page.id.startsWith('dokumenty-'))
+    .map((page) => ({ params: { slug: page.id.slice('dokumenty-'.length) }, props: { page } }));
+}
+
+const { page } = Astro.props;
+const { Content } = await render(page);
+const pageHeroIcon = page.id === 'dokumenty-skolni-rad'
+  ? heroImages.schoolRules
+  : page.id === 'dokumenty-rozvrhy'
+    ? heroImages.schedules
+    : heroImages.documents;
+---
+<BaseLayout title={page.data.title} description={page.data.description} seo={page.data.seo} breadcrumbs={[{ label: 'Dokumenty', href: '/dokumenty/' }, { label: page.data.title }]}>
+  <PageHero eyebrow={page.data.eyebrow ?? 'Dokumenty'} title={page.data.title} description={page.data.highlight ?? page.data.description} accent="#59BDDC" icon={pageHeroIcon} iconBackground="#001731" />
+  <article class="container-page pb-14 sm:pb-20" data-pagefind-body>
+    <span class="sr-only" data-pagefind-filter="typ">Dokumenty</span>
+    <div class="mt-10"><ContentRenderer blocks={page.data.contentBlocks}><Content /></ContentRenderer></div>
+  </article>
+</BaseLayout>

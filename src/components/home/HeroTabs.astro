@@ -1,0 +1,81 @@
+---
+import { heroTabs } from '../../data/heroTabs';
+import ResponsiveImage from '../ResponsiveImage.astro';
+import HeroActions from '../content/HeroActions.astro';
+
+const defaultTab = 'skola';
+---
+
+<section class="bg-paper py-5 sm:py-7" aria-label="Poznejte školu a studijní obory" data-hero-tabs>
+  <div class="container-page">
+    <div class="hero-tabs-shell overflow-hidden rounded-2xl shadow-lift">
+      <div class="relative min-h-[27rem] bg-night sm:min-h-[31rem] lg:min-h-[34rem]" data-hero-panels>
+        {heroTabs.map((tab) => <article
+          id={`hero-panel-${tab.id}`}
+          role="tabpanel"
+          aria-labelledby={`hero-tab-${tab.id}`}
+          class="hero-panel relative isolate min-h-[27rem] overflow-hidden sm:min-h-[31rem] lg:min-h-[34rem]"
+          data-hero-panel={tab.id}
+          style={`--hero-color:${tab.color};--hero-text:${tab.textColor}`}
+          hidden={tab.id !== defaultTab}
+        >
+          <ResponsiveImage src={tab.image} sizes="100vw" alt="" class="absolute inset-0 -z-10 h-full w-full object-cover" loading={tab.id === defaultTab ? 'eager' : 'lazy'} fetchpriority={tab.id === defaultTab ? 'high' : undefined} />
+          <div class="hero-panel-overlay absolute inset-0 -z-10"></div>
+          <div class="hero-panel-content flex min-h-[27rem] max-w-3xl flex-col justify-end text-white sm:min-h-[31rem] lg:min-h-[34rem]">
+            <div class="hero-panel-copy p-6 sm:p-10 lg:p-14">
+              <p class="hero-panel-eyebrow eyebrow">{tab.eyebrow}</p>
+              {tab.id === defaultTab ? <h1 class="mt-3 max-w-2xl text-white">{tab.title}</h1> : <h2 class="mt-3 max-w-2xl text-white">{tab.title}</h2>}
+              {tab.motto && <p class="mt-4 max-w-xl font-display text-2xl font-bold leading-tight text-white sm:text-3xl">{tab.motto}</p>}
+              {tab.description && <p class="mt-4 max-w-xl text-base leading-7 text-white/80 sm:text-lg">{tab.description}</p>}
+              <HeroActions actions={tab.actions} primaryColor={tab.color} primaryTextColor={tab.textColor} />
+            </div>
+          </div>
+        </article>)}
+      </div>
+      <div class="hero-tablist grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6" role="tablist" aria-label="Témata hero">
+        {heroTabs.map((tab) => <button
+          id={`hero-tab-${tab.id}`}
+          type="button"
+          role="tab"
+          aria-selected={tab.id === defaultTab}
+          aria-controls={`hero-panel-${tab.id}`}
+          tabindex={tab.id === defaultTab ? 0 : -1}
+          class="hero-tab min-h-10 px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide transition hover:brightness-110 sm:px-5 sm:text-sm"
+          style={`--tab-color:${tab.color};--tab-text:${tab.textColor}`}
+          data-hero-tab={tab.id}
+        >
+          <span class="hero-tab-label">{tab.label}</span>
+        </button>)}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const heroRoot = document.querySelector('[data-hero-tabs]');
+  const heroButtons = [...(heroRoot?.querySelectorAll<HTMLButtonElement>('[data-hero-tab]') ?? [])];
+  const heroPanels = [...(heroRoot?.querySelectorAll<HTMLElement>('[data-hero-panel]') ?? [])];
+
+  const activateHero = (id: string | null, moveFocus = false) => {
+    heroButtons.forEach((button) => {
+      const active = button.getAttribute('data-hero-tab') === id;
+      button.setAttribute('aria-selected', String(active));
+      button.setAttribute('tabindex', active ? '0' : '-1');
+      if (active && moveFocus && button instanceof HTMLElement) button.focus();
+    });
+    heroPanels.forEach((panel) => {
+      panel.hidden = panel.getAttribute('data-hero-panel') !== id;
+    });
+  };
+
+  heroButtons.forEach((button, index) => {
+    button.addEventListener('click', () => activateHero(button.getAttribute('data-hero-tab'), false));
+    button.addEventListener('keydown', (event: KeyboardEvent) => {
+      if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+      event.preventDefault();
+      const nextIndex = event.key === 'Home' ? 0 : event.key === 'End' ? heroButtons.length - 1 : event.key === 'ArrowRight' ? (index + 1) % heroButtons.length : (index - 1 + heroButtons.length) % heroButtons.length;
+      const next = heroButtons[nextIndex];
+      if (next instanceof HTMLElement) activateHero(next.getAttribute('data-hero-tab'), true);
+    });
+  });
+</script>

@@ -1,0 +1,16 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import GalleryLightbox from '../../components/GalleryLightbox.astro';
+import PageHero from '../../components/content/PageHero.astro';
+import SearchMetadata from '../../components/content/SearchMetadata.astro';
+import { entries, formatDate } from '../../lib/content';
+export async function getStaticPaths() { return (await entries('galleries')).map((gallery) => ({ params: { slug: gallery.id }, props: { gallery } })); }
+const { gallery } = Astro.props;
+const { Content } = await render(gallery);
+---
+<BaseLayout title={gallery.data.title} description={gallery.data.description} seo={gallery.data.seo} image={gallery.data.cover} breadcrumbs={[{ label: 'Galerie', href: '/galerie/' }, { label: gallery.data.title }]}>
+  <PageHero eyebrow={`Galerie · ${formatDate(gallery.data.date)}`} title={gallery.data.title} description={gallery.data.description} accent="#ECAFAC" image={gallery.data.cover} />
+  <SearchMetadata type="Galerie" programs={gallery.data.programs} categories={gallery.data.categories} tags={gallery.data.tags} year={gallery.data.date.getFullYear()} />
+  <section class="container-page pb-12 sm:pb-16">{gallery.body?.trim() && <div class="prose-school"><Content /></div>}<div class="mt-10"><GalleryLightbox photos={gallery.data.photos} title={gallery.data.title} /></div></section>
+</BaseLayout>

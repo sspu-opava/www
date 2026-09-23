@@ -1,0 +1,21 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getArticleHeroColor } from '../../data/articleVisuals';
+import ArticleMedia from './ArticleMedia.astro';
+
+interface Props { article: CollectionEntry<'articles'> }
+const { article } = Astro.props;
+const heroColor = getArticleHeroColor(article.data.programs);
+---
+
+<section class="container-page py-8 sm:py-10" style={`--article-hero-color:${heroColor}`} aria-labelledby={`article-title-${article.id}`}>
+  <div class="relative isolate overflow-hidden rounded-2xl bg-night text-white shadow-lift">
+    <ArticleMedia article={article} alt={article.data.coverAlt || article.data.title} class="absolute inset-0 -z-10" loading="eager" />
+    <div class="relative z-10 flex min-h-[24rem] flex-col justify-end p-6 sm:min-h-[28rem] sm:p-10 lg:min-h-[32rem] lg:p-14">
+      <div class="article-hero-copy max-w-4xl py-3 pl-4 sm:pl-6">
+        <h1 id={`article-title-${article.id}`} class="text-3xl leading-tight text-white sm:text-4xl lg:text-5xl" data-pagefind-meta="title">{article.data.title}</h1>
+        <p class="mt-4 max-w-3xl text-base leading-7 text-white/85 sm:text-lg">{article.data.description}</p>
+      </div>
+    </div>
+  </div>
+</section>

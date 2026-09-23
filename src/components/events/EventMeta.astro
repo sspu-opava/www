@@ -1,0 +1,22 @@
+---
+import { eventTagLabel, formatEventDateRange } from '../../lib/events';
+import { withBase } from '../../lib/content';
+import type { EventEntry } from '../../lib/events';
+
+interface Props {
+  event: EventEntry;
+  showTags?: boolean;
+  showLocation?: boolean;
+  compact?: boolean;
+}
+
+const { event, showTags = true, showLocation = true, compact = false } = Astro.props;
+const data = event.data;
+---
+<div class:list={["event-meta", compact && "event-meta-compact"]}>
+  <time class="event-meta-date" datetime={`${data.startDate}${data.startTime ? `T${data.startTime}` : ''}`}>{formatEventDateRange(event)}</time>
+  {showLocation && data.location && <span class="event-meta-location">{data.location}</span>}
+  {showTags && data.tags.length > 0 && <div class="event-meta-tags" aria-label="Štítky události">
+    {data.tags.map((tag) => <a class="event-tag" href={withBase(`/udalosti/?stitky=${encodeURIComponent(tag)}`)}>{eventTagLabel(tag)}</a>)}
+  </div>}
+</div>

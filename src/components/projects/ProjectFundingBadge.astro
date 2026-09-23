@@ -1,0 +1,9 @@
+---
+interface Props { text?: string }
+const { text } = Astro.props as Props;
+---
+
+{text && <aside class="project-funding-badge" aria-label="Informace o financování">
+  <span class="project-funding-mark" aria-hidden="true">EU</span>
+  <span>{text}</span>
+</aside>}

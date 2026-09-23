@@ -1,0 +1,71 @@
+---
+import type { NavGroup as NavGroupData } from '../../data/navigation';
+import { withBase } from '../../lib/content';
+
+interface Props {
+  group: NavGroupData;
+  variant?: 'desktop' | 'mobile';
+}
+
+const { group, variant = 'desktop' } = Astro.props;
+const basePath = import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL.replace(/\/$/, '');
+const currentPath = Astro.url.pathname.startsWith(basePath) ? Astro.url.pathname.slice(basePath.length) || '/' : Astro.url.pathname;
+const isActive = (href: string) => {
+  if (href.startsWith('http')) return false;
+  const path = href.split('#')[0];
+  return path === '/' ? currentPath === '/' : currentPath === path || currentPath.startsWith(path);
+};
+---
+
+{variant === 'desktop' ? (
+  <div class="relative flex items-center" data-menu-group>
+    <a
+      href={withBase(group.href)}
+      class:list={[
+        'rounded-lg px-2.5 py-2 text-[1rem] font-normal uppercase leading-tight tracking-[0.04em] no-underline transition hover:bg-white hover:text-brand',
+        isActive(group.href) && 'bg-white text-brand'
+      ]}
+      aria-current={currentPath === group.href ? 'page' : isActive(group.href) ? 'location' : undefined}
+    >{group.label}</a>
+    <button
+      type="button"
+      class="grid h-9 w-8 place-items-center rounded-lg text-night transition hover:bg-white hover:text-brand"
+      aria-label={`Rozbalit sekci ${group.label}`}
+      aria-expanded="false"
+      aria-controls={`desktop-menu-${group.id}`}
+      data-menu-trigger
+    >
+      <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 7 5 5 5-5" /></svg>
+    </button>
+    <div id={`desktop-menu-${group.id}`} class="absolute left-0 top-[calc(100%+.65rem)] z-50 min-w-64 rounded-xl border border-ink/10 bg-white p-2 shadow-lift" data-menu-panel hidden>
+      <a href={withBase(group.href)} class="mb-1 block rounded-lg bg-mist px-4 py-3 text-sm font-semibold text-brand no-underline hover:bg-school-cyan/20">Přehled: {group.label}</a>
+      <ul class="grid gap-0.5">
+        {group.items.slice(1).map((item) => <li>
+          <a
+            href={item.external ? item.href : withBase(item.href)}
+            target={item.external ? '_blank' : undefined}
+            rel={item.external ? 'noreferrer' : undefined}
+            class:list={['block rounded-lg px-4 py-2.5 text-sm font-medium no-underline transition hover:bg-mist hover:text-brand', isActive(item.href) && 'bg-mist text-brand']}
+            aria-current={currentPath === item.href ? 'page' : isActive(item.href) ? 'location' : undefined}
+          >{item.label}{item.external && <span aria-hidden="true" class="ml-1 text-xs">↗</span>}</a>
+        </li>)}
+      </ul>
+    </div>
+  </div>
+) : (
+  <details class="border-t border-ink/10 py-1" data-mobile-group>
+    <summary class="flex cursor-pointer list-none items-center justify-between rounded-lg px-4 py-3 text-[0.9rem] font-normal uppercase tracking-[0.04em] transition hover:bg-mist hover:text-brand">
+      <span class:list={[isActive(group.href) && 'text-brand']}>{group.label}</span>
+      <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 transition group-open:rotate-180"><path d="m5 7 5 5 5-5" /></svg>
+    </summary>
+    <div class="pb-2 pl-3">
+      <a href={withBase(group.href)} class="block rounded-lg px-4 py-2.5 text-sm font-semibold text-brand no-underline hover:bg-mist">Přehled: {group.label}</a>
+      {group.items.slice(1).map((item) => <a
+        href={item.external ? item.href : withBase(item.href)}
+        target={item.external ? '_blank' : undefined}
+        rel={item.external ? 'noreferrer' : undefined}
+        class:list={['block rounded-lg px-4 py-2.5 text-sm font-medium no-underline hover:bg-mist hover:text-brand', isActive(item.href) && 'text-brand']}
+      >{item.label}{item.external && <span aria-hidden="true" class="ml-1 text-xs">↗</span>}</a>)}
+    </div>
+  </details>
+)}

@@ -1,0 +1,31 @@
+{
+  "alerts": [
+    {
+      "id": "industrial-design-posters",
+      "articleId": "plakaty-prumyslovy-design",
+      "enabled": true,
+      "variant": "text",
+      "tone": "mist",
+      "desktopColumns": 6,
+      "label": "Z tvorby studentů"
+    },
+    {
+      "id": "litomysl-field-trip",
+      "articleId": "exkurze-do-litomysle",
+      "enabled": true,
+      "variant": "banner",
+      "tone": "brand",
+      "desktopColumns": 8,
+      "label": "Škola v terénu"
+    },
+    {
+      "id": "ai-olympiad-success",
+      "articleId": "uspech-nasich-zaku-v-narodnim-kole-ceske-ai-olympiady",
+      "enabled": true,
+      "variant": "text",
+      "tone": "accent",
+      "desktopColumns": 4,
+      "label": "Úspěch studentů"
+    }
+  ]
+}

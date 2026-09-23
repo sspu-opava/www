@@ -1,0 +1,633 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Hind Guntur';
+  src: url('../../fonts/HindGuntur-Light.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Hind Guntur';
+  src: url('../../fonts/HindGuntur-Regular.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Hind Guntur';
+  src: url('../../fonts/HindGuntur-Bold.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+@layer base {
+  :root { color-scheme: light; }
+  html { scroll-behavior: smooth; }
+  [hidden] { display: none !important; }
+  body { @apply min-w-[320px] bg-paper font-body text-ink antialiased; background-image: linear-gradient(180deg, rgb(255 255 255 / 72%), transparent 24rem); }
+  main { min-width: 0; }
+  h1, h2, h3, h4 { @apply font-display font-bold tracking-[-0.04em] text-night; }
+  h1 { font-size: 2.5rem; font-weight: 300; line-height: 1.08; text-transform: uppercase; }
+  h2 { font-size: 1.5rem; font-weight: 400; line-height: 1.2; text-transform: uppercase; }
+  h3 { @apply text-xl leading-snug sm:text-2xl; }
+  p { font-size: 1rem; font-weight: 400; }
+  a { @apply underline-offset-4; }
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible {
+    @apply outline-none ring-4 ring-school-cyan/50 ring-offset-2 ring-offset-paper;
+  }
+  ::selection { @apply bg-accent/35 text-night; }
+}
+
+@layer components {
+  .container-page { @apply mx-auto w-full max-w-[75rem] px-5 sm:px-8; }
+  .eyebrow { @apply text-xs font-bold uppercase tracking-[0.16em] text-brand; }
+  .button-primary { @apply inline-flex min-h-11 items-center justify-center rounded-lg bg-night px-5 py-2.5 text-sm font-semibold text-white no-underline transition hover:bg-school-magenta; }
+  .button-secondary { @apply inline-flex min-h-11 items-center justify-center rounded-lg border border-ink/15 bg-white px-5 py-2.5 text-sm font-semibold text-ink no-underline shadow-soft transition hover:border-school-cyan hover:bg-mist hover:text-night; }
+  .card { @apply rounded-2xl border border-ink/10 bg-white shadow-lift; }
+  .people-section { @apply min-w-0; }
+  .contact-page-heading { @apply pt-8 pb-4 sm:pt-10 sm:pb-5; }
+  .contact-people { @apply pb-16 sm:pb-24; }
+  .people-section-heading { @apply mb-4 border-b border-ink/10 pb-3; }
+  .people-section-heading h2 { @apply m-0 text-xl font-semibold leading-tight sm:text-2xl; }
+  .people-list { @apply mt-4 grid min-w-0 gap-3 sm:gap-4; }
+  .people-list-vertical { @apply sm:grid-cols-2; }
+  .people-list-compact { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+  .people-list-compact > .people-list-entry { @apply lg:col-span-3; }
+  .people-list-list { @apply gap-3; }
+  .people-list-entry { @apply min-w-0; }
+  .person-card { @apply relative min-w-0 cursor-pointer overflow-hidden rounded-none border border-ink/10 bg-white text-left shadow-none transition-colors duration-200 hover:bg-mist/35 hover:shadow-soft focus-visible:shadow-soft; }
+  .person-card-vertical { @apply flex flex-col; }
+  .person-card-compact { display: grid; grid-template-columns: 3.75rem minmax(0, 1fr); align-items: start; column-gap: 1rem; padding: 1rem; }
+  .person-card-compact:not(.person-card-has-photo) { display: block; padding: 1rem; }
+  .person-card-list { @apply grid gap-4 p-5 sm:grid-cols-[minmax(10rem,.35fr)_1fr] sm:items-center; }
+  .person-card-photo { @apply block shrink-0 overflow-hidden bg-mist no-underline; }
+  .person-card-vertical .person-card-photo { @apply aspect-[16/9] w-full; }
+  .person-card-compact .person-card-photo { @apply h-[3.75rem] w-[3.75rem] rounded-full border border-ink/10; }
+  .person-card-list .person-card-photo { @apply aspect-[4/3] w-full rounded-xl; }
+  .person-card-photo img { @apply h-full w-full object-cover object-top transition duration-500; }
+  .person-card:hover .person-card-photo img, .person-card:focus-visible .person-card-photo img { @apply scale-[1.03]; }
+  .person-card-content { @apply min-w-0 p-4; }
+  .person-card-compact .person-card-content, .person-card-list .person-card-content { @apply p-0 pt-0.5; }
+  .person-card-workplace { @apply text-[0.62rem] font-bold uppercase leading-4 tracking-[0.11em] text-brand; }
+  .person-card-name { @apply mt-0 text-[0.92rem] font-semibold leading-tight sm:text-base; }
+  .person-card-position { @apply mt-1 text-[0.7rem] font-semibold leading-5 text-ink/70; }
+  .person-meta { @apply mt-3 grid gap-1.5 text-xs leading-4 text-ink/70; }
+  .person-meta-compact { @apply mt-3 gap-1.5 text-xs leading-5; }
+  .person-meta-item { @apply flex min-w-0 items-start gap-1.5; }
+  .person-meta-icon { @apply mt-0.5 h-3.5 w-3.5 shrink-0 fill-none stroke-current stroke-[1.7]; }
+  .person-card-compact .person-meta-icon { @apply h-3.5 w-3.5; }
+  .person-meta-workplace { @apply font-semibold text-ink/70; }
+  .person-meta-link { @apply min-w-0 break-all font-semibold text-brand no-underline hover:text-school-magenta; }
+  .person-meta-fields { @apply flex flex-wrap gap-1.5; }
+  .person-field-tag { @apply rounded-full border border-ink/10 bg-mist px-2.5 py-1 text-xs font-semibold text-brand no-underline transition hover:border-school-cyan hover:bg-school-cyan/15; }
+  .person-dialog { @apply m-auto w-[min(92vw,34rem)] max-w-none rounded-2xl border border-ink/15 bg-white p-0 text-ink shadow-2xl; max-height: 90vh; }
+  .person-dialog::backdrop { @apply bg-night/65; }
+  .person-dialog-shell { @apply relative max-h-[90vh] overflow-y-auto; }
+  .person-dialog-close-form { @apply absolute right-3 top-3 z-10 flex justify-end; }
+  .person-dialog-close { @apply grid h-9 w-9 place-items-center rounded-full border border-ink/10 bg-white/90 text-night shadow-soft transition hover:bg-mist; }
+  .person-dialog-close svg { @apply h-4 w-4 fill-none stroke-current stroke-2; }
+  .person-dialog-header { @apply flex flex-col items-center border-b border-ink/10 px-6 pb-6 pt-10 text-center; }
+  .person-dialog-heading { @apply w-full max-w-[24rem]; }
+  .person-dialog-heading h2 { @apply text-xl leading-tight sm:text-2xl; }
+  .person-dialog-heading .person-meta { @apply mx-auto mt-3 max-w-[22rem] text-left; }
+  .person-dialog-workplace { @apply mb-1 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-brand; }
+  .person-dialog-position { @apply mt-1 text-sm font-semibold leading-5 text-ink/70; }
+  .person-dialog-photo { @apply mb-4 h-24 w-24 overflow-hidden rounded-full border border-ink/10 bg-mist shadow-soft; }
+  .person-dialog-photo img { @apply h-full w-full object-cover object-top; }
+  .person-dialog-body { @apply px-6 pb-7 pt-5; }
+  .person-dialog-body > .prose-school { @apply max-w-none; }
+  .person-dialog-footer { @apply border-t border-ink/10 px-6 py-5 text-sm font-bold sm:px-10; }
+  body.person-dialog-open { overflow: hidden; }
+  .attachment-dialog { @apply m-auto w-[min(94vw,72rem)] max-w-none rounded-2xl border border-ink/15 bg-white p-0 text-ink shadow-2xl; max-height: 92vh; }
+  .attachment-dialog::backdrop { @apply bg-night/70; }
+  .attachment-dialog-shell { @apply relative max-h-[92vh] overflow-y-auto; }
+  .attachment-dialog-close-form { @apply absolute right-3 top-3 z-10; }
+  .attachment-dialog-close { @apply grid h-10 w-10 place-items-center rounded-full border border-ink/10 bg-white/90 text-2xl leading-none text-night shadow-soft transition hover:bg-mist; }
+  .attachment-dialog-header { @apply border-b border-ink/10 px-6 pb-5 pt-8 sm:px-8; }
+  .attachment-dialog-preview { @apply flex min-h-[16rem] items-center justify-center bg-mist p-3 sm:min-h-[22rem] sm:p-6; }
+  .attachment-dialog-preview iframe { @apply h-[min(68vh,48rem)] w-full border-0 bg-white; }
+  .attachment-dialog-preview img { @apply max-h-[68vh] max-w-full object-contain; }
+  .attachment-dialog-empty { @apply max-w-xl px-6 py-16 text-center text-sm leading-6 text-ink/70; }
+  .attachment-dialog-footer { @apply flex justify-end border-t border-ink/10 px-6 py-5 sm:px-8; }
+  .attachment-list-item { @apply no-underline; }
+  .content-callout { @apply overflow-hidden rounded-2xl bg-night p-6 text-white shadow-lift sm:p-8; }
+  .content-callout h2 { @apply text-white; }
+  .content-callout .eyebrow { @apply text-accent; }
+  .attachment-list-item-night { @apply border-white/15 bg-white/10 shadow-none hover:bg-white/15; }
+  .attachment-list-item-night .event-attachment-type { @apply bg-accent text-night; }
+  .attachment-list-item-night .attachment-list-item-copy strong { @apply text-white; }
+  .attachment-list-item-night .attachment-list-item-copy > span { @apply text-white/70; }
+  .learning-materials { @apply max-w-5xl; }
+  .learning-material-category { @apply border-b border-ink/10 pb-2 text-xs font-bold uppercase tracking-[0.16em] text-brand; }
+  .learning-material-group { @apply overflow-hidden border border-ink/10 bg-white shadow-soft; }
+  .learning-material-group[open] { @apply shadow-lift; }
+  .learning-material-summary { @apply flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 transition hover:bg-mist/60 sm:px-6; }
+  .learning-material-summary::-webkit-details-marker { display: none; }
+  .learning-material-summary::after { content: '+'; @apply shrink-0 text-2xl font-light leading-none text-brand transition; }
+  .learning-material-group[open] .learning-material-summary::after { content: '−'; }
+  .learning-material-index { @apply mr-3 inline-block text-[0.68rem] font-bold tracking-[0.12em] text-school-cyan; }
+  .learning-material-group-title { @apply text-base font-bold leading-snug text-night sm:text-lg; }
+  .learning-material-group-description { @apply mt-1 block text-sm leading-6 text-ink/65; }
+  .learning-material-count { @apply hidden shrink-0 text-xs font-bold uppercase tracking-[0.08em] text-ink/45 sm:block; }
+  .learning-material-body { @apply border-t border-ink/10 bg-paper/45 px-4 py-4 sm:px-6 sm:py-5; }
+  .learning-material-list { @apply grid gap-2 sm:grid-cols-2; }
+  .learning-material-link { @apply flex min-h-12 items-center gap-3 border border-ink/10 bg-white px-3 py-2.5 text-sm no-underline transition hover:-translate-y-0.5 hover:border-school-cyan hover:shadow-soft; }
+  .learning-material-link strong { @apply min-w-0 break-words font-semibold leading-5 text-night; }
+  .learning-material-link small { @apply mt-1 block text-xs leading-5 text-ink/60; }
+  .learning-material-filetype { @apply grid h-8 w-9 shrink-0 place-items-center bg-brand text-[0.58rem] font-bold tracking-wide text-white; }
+  .learning-material-filetype-external { @apply bg-school-cyan/15 text-brand; }
+  .learning-material-empty { @apply text-sm text-ink/65; }
+  .school-contact { @apply container-page pb-10 sm:pb-14; }
+  .school-contact-intro { @apply overflow-hidden rounded-3xl bg-white shadow-lift; }
+  .school-contact-brand { @apply grid gap-6 p-6 sm:grid-cols-[minmax(10rem,15rem)_1fr] sm:items-center sm:p-8; }
+  .school-contact-brand img { @apply h-auto w-44 max-w-full; }
+  .school-contact-brand h2 { @apply text-2xl leading-tight sm:text-3xl; }
+  .school-contact-description { @apply mt-3 max-w-2xl text-sm leading-6 text-ink/70; }
+  .school-contact-building { @apply aspect-[16/7] w-full object-cover; }
+  .school-contact-grid { @apply mt-6 grid gap-6 lg:grid-cols-2; }
+  .school-contact-panel { @apply rounded-3xl bg-mist p-6 sm:p-8; }
+  .school-contact-section-label { @apply gap-0; }
+  .school-contact-section-label::before { display: none; }
+  .school-contact-data { @apply mt-5 grid gap-4; }
+  .school-contact-data div { @apply border-t border-ink/10 pt-3; }
+  .school-contact-data dt { @apply text-xs font-bold uppercase tracking-[0.12em] text-ink/55; }
+  .school-contact-data dd { @apply mt-1 text-sm leading-6 text-ink/85; }
+  .school-contact-data a, .school-building-copy a { @apply font-bold text-brand no-underline hover:text-school-magenta; }
+  .school-hours { @apply mt-5 w-full border-collapse text-sm; }
+  .school-hours tr { @apply border-t border-ink/10; }
+  .school-hours th, .school-hours td { @apply py-2.5 text-left; }
+  .school-hours th { @apply font-semibold text-ink/75; }
+  .school-hours td { @apply text-right font-bold text-night; }
+  .teacher-table-link { @apply font-semibold text-brand underline decoration-brand/35 underline-offset-4 transition hover:text-school-magenta hover:decoration-school-magenta; }
+  .school-buildings { @apply mt-8; }
+  .school-building-grid { @apply grid gap-4 lg:grid-cols-2; }
+  .school-building-card { @apply grid min-w-0 overflow-hidden rounded-xl border border-ink/10 bg-white shadow-soft; grid-template-rows: 10.5rem 15rem; }
+  .school-building-copy { @apply flex min-h-0 flex-col gap-3 p-5; }
+  .school-building-type { @apply text-[0.65rem] font-bold uppercase tracking-[0.14em] text-brand; }
+  .school-building-copy h3 { @apply mt-1 text-lg leading-tight sm:text-xl; }
+  .school-building-copy p:not(.school-building-type) { @apply text-sm text-ink/70; }
+  .school-building-contact { @apply mt-auto grid gap-1.5; }
+  .school-contact-link { @apply inline-flex min-w-0 items-center gap-2 text-xs font-semibold text-brand no-underline hover:text-school-magenta; }
+  .school-contact-link svg { @apply h-4 w-4 shrink-0 fill-none stroke-current stroke-[1.7]; }
+  .school-building-map { @apply block h-full min-h-0 w-full border-0 bg-mist; }
+  .prose-school { @apply max-w-3xl text-base leading-8 text-ink/85; }
+  .prose-school :where(h2,h3) { @apply mt-10; }
+  .prose-school :where(a) { @apply font-semibold text-brand decoration-2 decoration-school-cyan/70 hover:text-school-magenta; }
+  .prose-school :where(ul) { @apply my-6 list-disc space-y-2 pl-6; }
+  .prose-school :where(ol) { @apply my-6 list-decimal space-y-2 pl-6; }
+  .prose-school :where(table) { @apply my-8 w-full border-collapse overflow-hidden text-left text-sm; }
+  .prose-school :where(th) { @apply border border-ink/15 bg-mist px-3 py-3 font-bold text-night; }
+  .prose-school :where(td) { @apply border border-ink/15 px-3 py-3 align-top; }
+  .prose-school :where(iframe) { @apply my-8 aspect-video w-full rounded-2xl border-0 bg-night shadow-soft; }
+  .prose-school :where(audio) { @apply my-6 w-full; }
+  .prose-school :where(figure) { @apply my-8; }
+  .prose-school :where(figure img) { @apply w-full rounded-2xl shadow-soft; }
+  .prose-school :where(figcaption) { @apply mt-3 text-sm leading-6 text-ink/65; }
+  .article-body-columns :where(h2, h3) { @apply mb-4 mt-10; }
+  .article-body-columns :where(h2) { @apply text-2xl leading-tight sm:text-3xl; }
+  .article-body-columns :where(h3) { @apply text-xl leading-snug sm:text-2xl; }
+  .article-body-columns :where(h2:first-child, h3:first-child) { @apply mt-0; }
+  .article-body-columns :where(p) { @apply my-5; }
+  .article-body-columns :where(ul, ol) { @apply my-5; }
+  .article-body-columns :where(figure, iframe, audio, table) { @apply my-7; }
+  .article-body-columns :where(h2, h3) + :where(p, ul, ol, figure, iframe, audio, table) { @apply mt-3; }
+  .article-body-columns > :where(h2, h3, figure, iframe, audio, table, blockquote, pre) { break-inside: avoid; }
+  .article-body-columns > :where(h2, h3) { break-after: avoid; }
+  .article-wide-section { column-span: all; }
+  .skip-link { @apply sr-only fixed left-4 top-4 z-[100] rounded-lg bg-night px-4 py-3 font-bold text-white focus:not-sr-only; }
+  .quick-link { @apply grid h-7 w-7 place-items-center rounded-full border border-white/35 text-white no-underline transition hover:border-accent hover:bg-accent hover:text-night; }
+  .quick-link svg { @apply h-4 w-4; }
+  body.menu-open { overflow: hidden; }
+  .alert-card { @apply relative overflow-hidden rounded-2xl; }
+  .alert-meta { @apply text-xs font-semibold uppercase tracking-[0.14em]; }
+  .alert-tone-night { @apply bg-night text-white shadow-lift; }
+  .alert-tone-brand { @apply bg-brand text-white shadow-lift; }
+  .alert-tone-mist { @apply border border-ink/10 bg-mist text-ink shadow-soft; }
+  .alert-tone-accent { @apply bg-accent text-night shadow-soft; }
+  .alert-text-card h3 { @apply text-night; }
+  .alert-tone-night h3, .alert-tone-brand h3 { @apply text-white; }
+  .alert-tone-night .alert-meta, .alert-tone-brand .alert-meta { @apply text-accent; }
+  .alert-tone-mist .alert-meta { @apply text-brand; }
+  .alert-tone-accent .alert-meta { @apply text-night/70; }
+  .alert-description { @apply text-ink/75; }
+  .alert-tone-night .alert-description, .alert-tone-brand .alert-description { @apply text-white/80; }
+  .alert-tone-accent .alert-description { @apply text-night/75; }
+  .alert-link { @apply text-brand; }
+  .alert-tone-night .alert-link, .alert-tone-brand .alert-link { @apply text-white; }
+  .alert-tone-accent .alert-link { @apply text-night; }
+  .hero-panel[hidden] { display: none; }
+  .hero-panel-overlay { background: transparent; }
+  .hero-panel-copy {
+    width: fit-content;
+    max-width: 100%;
+    border-inline-start: 0.25rem solid color-mix(in srgb, var(--hero-color) 90%, white 10%);
+    background: linear-gradient(90deg, rgb(8 36 58 / 90%) 0%, rgb(8 36 58 / 72%) 62%, transparent 100%);
+  }
+  .hero-panel-eyebrow { color: color-mix(in srgb, var(--hero-color) 65%, white 35%); }
+  .hero-action-primary { background-color: var(--hero-action-bg, #D0D543); color: var(--hero-action-text, #08243A); }
+  .hero-action-primary:hover { background-color: #FFFFFF; color: #08243A; }
+  @keyframes homepage-news-pan {
+    0%, 100% { transform: scale(1.05) translate3d(-1%, 0, 0); }
+    50% { transform: scale(1.08) translate3d(1.2%, -0.5%, 0); }
+  }
+  .news-card-homepage-image { transform-origin: center; animation: homepage-news-pan 24s ease-in-out infinite; will-change: transform; }
+  .news-card-homepage:hover .news-card-homepage-image, .news-card-homepage:focus-within .news-card-homepage-image { animation-play-state: paused; }
+  @keyframes program-image-pan {
+    0%, 100% { transform: translate3d(-2%, 0, 0) scale(1.08); }
+    50% { transform: translate3d(2%, 0, 0) scale(1.08); }
+  }
+  .program-card-image { transform-origin: center; animation: program-image-pan 30s ease-in-out infinite; will-change: transform; }
+  .group:hover .program-card-image, .group:focus-within .program-card-image { animation-play-state: paused; }
+  .article-hero-copy {
+    border-inline-start: 0.25rem solid color-mix(in srgb, var(--article-hero-color) 90%, white 10%);
+    border-radius: 0 1rem 1rem 0;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--article-hero-color) 88%, #08243A 12%) 0%, color-mix(in srgb, var(--article-hero-color) 70%, #08243A 30%) 100%);
+    box-shadow: 0 18px 40px -24px rgb(8 36 58 / 70%);
+  }
+  .article-media-fallback {
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--article-fallback-primary), var(--article-fallback-secondary));
+  }
+  .article-media-fallback-shape { position: absolute; display: block; border: 1px solid rgb(255 255 255 / 26%); }
+  .article-media-fallback-shape-one { inset: -18% 22% 22% -8%; border-radius: 38% 62% 48% 52% / 54% 42% 58% 46%; background: rgb(255 255 255 / 12%); transform: rotate(-13deg); }
+  .article-media-fallback-shape-two { inset: 18% -8% -20% 48%; border-radius: 50%; background: rgb(8 36 58 / 20%); transform: rotate(24deg); }
+  .article-media-fallback-shape-three { inset: 22% 18% 18% 18%; border-radius: 1.5rem; background: linear-gradient(135deg, transparent, rgb(255 255 255 / 12%)); transform: rotate(16deg); }
+  .hero-tab { position: relative; background-color: var(--tab-color); color: var(--tab-text); }
+  .hero-tab[aria-selected='true'] .hero-tab-label { text-decoration-line: underline; text-decoration-style: dotted; text-decoration-thickness: 2px; text-underline-offset: 0.35rem; }
+  .hero-tab-label { position: relative; z-index: 1; }
+  .page-hero { padding-top: 1rem; padding-bottom: 1rem; }
+  .page-hero-shell {
+    min-height: 7rem;
+    border-bottom: 1px dotted #999;
+    padding-block: .5rem 1rem;
+  }
+  .page-hero-shell-with-icon {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 6rem;
+    align-items: center;
+    gap: 1.25rem;
+  }
+  .page-hero-title {
+    margin: 0;
+    max-width: 56rem;
+    color: #999;
+    font-size: 2.5rem;
+    font-weight: 500;
+    line-height: 1.08;
+    text-transform: uppercase;
+  }
+  .page-hero-icon { pointer-events: none; width: 6rem; height: 6rem; 
+    background-color: #eee;  
+    border-radius: 20%; display: grid; place-items: center; }
+  .page-hero-icon img { display: block; width: 80%; height: 80%; object-fit: contain; }
+  .section-hub-grid { @apply grid gap-4 sm:grid-cols-2 lg:grid-cols-3; }
+  .section-hub-card { @apply border border-ink/10 bg-white; }
+  .section-hub-card-icon { @apply grid h-16 w-16 place-items-center; }
+  .section-hub-card-icon img { @apply h-full w-full object-contain; }
+  .admission-layout { @apply grid gap-8 lg:grid-cols-[minmax(14rem,18rem)_minmax(0,1fr)] lg:items-start lg:gap-12; }
+  .admission-sidebar { @apply rounded-2xl border border-ink/10 bg-white p-5 shadow-soft sm:p-6 lg:sticky lg:top-6; }
+  .admission-sidebar-link { @apply flex items-center justify-between gap-3 border-t border-ink/10 py-3 text-sm font-bold text-brand no-underline transition hover:border-school-cyan hover:text-school-magenta; }
+  .admission-sidebar-link span { @apply text-school-cyan transition; }
+  .admission-sidebar-link:hover span { @apply translate-x-0.5; }
+  .admission-content { @apply min-w-0; }
+  .admission-content > :first-child { @apply mt-0; }
+  .admission-content .content-block-text { @apply max-w-none; }
+  .admission-content .content-block-heading { @apply scroll-mt-8; }
+  .job-offer-intro { @apply mt-10 flex flex-wrap items-end justify-between gap-6 rounded-2xl border border-ink/10 bg-white p-6 shadow-soft sm:p-8; }
+  .job-offer-filters { @apply mt-8 rounded-2xl border border-ink/10 bg-mist p-5 shadow-soft sm:p-7; }
+  .job-offer-filter-grid { @apply mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-5; }
+  .job-offer-filter-grid label { @apply grid gap-1.5 text-xs font-bold text-ink/75; }
+  .job-offer-filter-grid input, .job-offer-filter-grid select { @apply min-h-11 w-full rounded-lg border border-ink/15 bg-white px-3 text-sm font-normal text-ink outline-none transition focus:border-school-cyan focus:ring-2 focus:ring-school-cyan/20; }
+  .job-offer-filter-clear { @apply text-sm font-bold text-brand underline decoration-brand/40 underline-offset-4 hover:text-school-magenta; }
+  .job-offer-filter-result { @apply mt-4 text-sm text-ink/65; }
+  .job-offer-section { @apply mt-14; }
+  .job-offer-section-heading { @apply flex flex-wrap items-end justify-between gap-4 border-b border-ink/10 pb-4; }
+  .job-offer-count { @apply rounded-full bg-school-cyan/15 px-3 py-1 text-xs font-bold text-brand; }
+  .job-offer-grid { @apply mt-6 grid items-stretch gap-5 md:grid-cols-2 xl:grid-cols-3; }
+  .job-offer-card { @apply flex h-full min-w-0 flex-col border-t-4 border-t-school-cyan p-5 shadow-soft transition hover:-translate-y-1 hover:shadow-lift; }
+  .job-offer-card[hidden] { display: none; }
+  .job-offer-card-top { @apply flex items-start justify-between gap-4; }
+  .job-offer-company { @apply text-xs font-bold uppercase tracking-[0.12em] text-brand; }
+  .job-offer-company a { @apply no-underline hover:text-school-magenta; }
+  .job-offer-title { @apply mt-2 text-xl leading-tight; }
+  .job-offer-title a { @apply no-underline hover:text-school-magenta; }
+  .job-offer-status { @apply inline-flex max-w-[12rem] shrink-0 rounded-full border px-2.5 py-1 text-right text-[0.63rem] font-bold uppercase leading-4 tracking-[0.08em]; }
+  .job-offer-status-active { @apply border-school-lime/60 bg-school-lime/25 text-night; }
+  .job-offer-status-needs-review { @apply border-school-magenta/35 bg-school-magenta/10 text-school-magenta; }
+  .job-offer-status-closed, .job-offer-status-archived { @apply border-ink/15 bg-mist text-ink/70; }
+  .job-offer-meta { @apply mt-5 grid grid-cols-3 gap-2 border-y border-ink/10 py-4; }
+  .job-offer-meta dt, .job-offer-detail-meta dt { @apply text-[0.62rem] font-bold uppercase tracking-[0.1em] text-ink/55; }
+  .job-offer-meta dd { @apply mt-1 break-words text-xs font-semibold leading-5 text-night; }
+  .job-offer-summary { @apply mt-4 text-sm leading-6 text-ink/75; }
+  .job-offer-card-footer { @apply mt-auto flex flex-wrap items-center justify-between gap-3 pt-6; }
+  .job-offer-actions { @apply ml-auto flex items-center gap-2; }
+  .job-offer-symbol-button { @apply grid h-9 min-w-9 place-items-center rounded-lg border border-brand/25 bg-white px-2 text-[0.62rem] font-black uppercase tracking-[0.06em] text-brand no-underline shadow-soft transition hover:-translate-y-0.5 hover:border-school-cyan hover:bg-school-cyan/10 hover:text-school-magenta focus:outline-none focus:ring-2 focus:ring-school-cyan/40; }
+  .job-offer-review-note { @apply inline-flex items-center gap-1.5 text-xs font-bold text-school-magenta; }
+  .job-offer-review-note span { @apply grid h-5 w-5 place-items-center rounded-full bg-school-magenta text-xs text-white; }
+  .job-offer-detail-link { @apply ml-auto text-sm font-bold text-brand no-underline hover:text-school-magenta; }
+  .job-offer-empty { @apply mt-6 rounded-xl border border-dashed border-ink/20 bg-mist/50 p-5 text-ink/70; }
+  .job-offer-detail-grid { @apply mt-10 grid items-start gap-8 lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-12; }
+  .job-offer-detail-aside { @apply rounded-2xl border border-ink/10 bg-white p-5 shadow-soft sm:p-7 lg:sticky lg:top-6; }
+  .job-offer-detail-company { @apply border-b border-ink/10 pb-6; }
+  .job-offer-detail-meta { @apply grid gap-4 pt-6; }
+  .job-offer-detail-meta dd { @apply mt-1 text-sm font-semibold leading-6 text-night; }
+  .job-offer-detail-meta .job-offer-status { @apply whitespace-normal text-left; }
+  .job-offer-review-panel { @apply mt-6 border-l-4 border-school-magenta bg-school-magenta/10 p-4 text-sm leading-6 text-ink/80; }
+  .job-offer-review-panel strong { @apply text-school-magenta; }
+  .job-offer-review-panel p { @apply mt-1; }
+  .job-offer-detail-content { @apply min-w-0; }
+  .job-offer-body { @apply max-w-none; }
+  .job-offer-body > :first-child { @apply mt-0; }
+  .job-offer-contact, .job-offer-source-links { @apply mt-12 border-t border-ink/10 pt-10; }
+  .job-offer-source-link { @apply flex h-full items-center justify-between gap-4 rounded-xl border border-ink/10 bg-white p-4 font-bold text-brand no-underline shadow-soft transition hover:-translate-y-0.5 hover:border-school-cyan hover:text-school-magenta; }
+  .job-offer-source-link small { @apply ml-2 rounded bg-mist px-2 py-1 text-[0.62rem] font-bold uppercase tracking-[0.08em] text-ink/55; }
+  .job-offer-back-link { @apply mt-12 inline-flex text-sm font-bold text-brand no-underline hover:text-school-magenta; }
+  .page-intro { @apply relative overflow-hidden rounded-[2rem] border border-ink/10 bg-white px-6 py-8 shadow-lift sm:px-10 sm:py-10; }
+  .page-intro::after { content: ''; @apply absolute inset-x-0 bottom-0 h-1; background: linear-gradient(90deg, #1A4053 0 20%, #59BDDC 20% 40%, #ECAFAC 40% 60%, #D0D543 60% 80%, #C42079 80% 100%); }
+  .project-section-heading { @apply border-b border-ink/10 pb-4; }
+  .project-grid { @apply grid gap-5 md:grid-cols-2 xl:grid-cols-3; }
+  .project-card { @apply flex min-w-0 flex-col overflow-hidden rounded-2xl border border-ink/10 bg-white shadow-soft transition hover:-translate-y-0.5 hover:shadow-lift; }
+  .project-card-media { @apply relative block aspect-[16/9] overflow-hidden bg-night; }
+  .project-card-media img { @apply h-full w-full object-cover transition duration-500; }
+  .project-card:hover .project-card-media img, .project-card:focus-within .project-card-media img { @apply scale-105; }
+  .project-card-body { @apply flex flex-1 flex-col p-5 sm:p-6; }
+  .project-card-title { @apply mt-3 text-2xl leading-tight; }
+  .project-card-period { @apply text-xs font-semibold text-ink/60; }
+  .project-card-programme { @apply mt-2 text-xs font-bold uppercase tracking-[0.1em] text-brand; }
+  .project-card-summary { @apply mt-4 line-clamp-4 text-sm leading-6 text-ink/75; }
+  .project-card-fallback, .project-detail-fallback { @apply relative flex h-full items-end overflow-hidden bg-gradient-to-br from-brand via-night to-school-cyan p-6 text-white; }
+  .project-card-fallback::before, .project-detail-fallback::before { content: ''; @apply absolute -right-12 -top-16 h-48 w-48 rounded-full border border-white/25 bg-white/10; }
+  .project-card-fallback span, .project-detail-fallback span { @apply relative max-w-[18rem] text-xl font-bold leading-tight; }
+  .project-status { @apply inline-flex items-center rounded-full border px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-[0.08em]; }
+  .project-status-active { @apply border-school-lime/50 bg-school-lime/20 text-night; }
+  .project-status-completed { @apply border-school-cyan/40 bg-school-cyan/15 text-brand; }
+  .project-status-archived { @apply border-ink/15 bg-mist text-ink/70; }
+  .project-meta { @apply grid gap-4 border-y border-ink/10 py-5 sm:grid-cols-2; }
+  .project-meta > div { @apply min-w-0; }
+  .project-meta dt { @apply text-[0.65rem] font-bold uppercase tracking-[0.12em] text-ink/55; }
+  .project-meta dd { @apply mt-1 break-words text-sm leading-6 text-night; }
+  .project-meta-compact { @apply mt-5 grid-cols-2 gap-x-4 gap-y-3 border-0 py-0; }
+  .project-meta-compact > div:nth-child(n+4) { display: none; }
+  .project-filters { @apply rounded-2xl border border-ink/10 bg-mist p-5 shadow-soft sm:p-7; }
+  .project-filter-grid { @apply mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-5; }
+  .project-filter-grid label { @apply grid gap-1.5 text-xs font-bold text-ink/75; }
+  .project-filter-grid input, .project-filter-grid select { @apply min-h-11 w-full rounded-lg border border-ink/15 bg-white px-3 text-sm font-normal text-ink outline-none transition focus:border-school-cyan focus:ring-2 focus:ring-school-cyan/20; }
+  .project-filter-clear { @apply text-sm font-bold text-brand underline decoration-brand/40 underline-offset-4 hover:text-school-magenta; }
+  .project-filter-result { @apply mt-4 text-sm text-ink/65; }
+  .project-empty { @apply mt-5 rounded-xl border border-dashed border-ink/20 bg-mist/50 p-5 text-ink/70; }
+  .project-back-link { @apply inline-flex pt-8 text-sm font-bold text-brand no-underline hover:text-school-magenta sm:pt-10; }
+  .project-detail-hero { @apply mt-6 grid overflow-hidden rounded-2xl bg-night text-white shadow-lift lg:grid-cols-[minmax(0,1.1fr)_minmax(20rem,.9fr)]; }
+  .project-detail-hero-media { @apply min-h-[16rem] bg-night lg:min-h-[25rem]; }
+  .project-detail-hero-media img { @apply h-full w-full object-cover; }
+  .project-detail-hero-copy { @apply flex flex-col justify-center p-6 sm:p-9 lg:p-12; }
+  .project-detail-hero-copy h1 { @apply mt-5 text-4xl text-white sm:text-5xl; }
+  .project-detail-summary { @apply mt-5 text-base leading-7 text-white/75 sm:text-lg; }
+  .project-detail-meta-wrap { @apply mt-8 rounded-2xl bg-mist p-5 sm:p-7; }
+  .project-detail-meta-wrap .project-meta { @apply border-0 py-0 lg:grid-cols-3; }
+  .project-detail-content { @apply mx-auto mt-12 max-w-4xl; }
+  #kontakt-oboru > .grid { grid-template-columns: minmax(0, 1fr); }
+  .project-detail-section { @apply mx-auto mt-14 max-w-5xl; }
+  .project-funding-badge { @apply mt-6 flex max-w-xl items-center gap-3 border-t border-white/20 pt-4 text-sm font-semibold leading-6 text-white/80; }
+  .project-funding-mark { @apply grid h-9 w-9 shrink-0 place-items-center rounded-full border border-school-cyan bg-school-cyan/20 text-[0.65rem] font-black text-white; }
+  .project-links-list { @apply mt-6 grid gap-3 md:grid-cols-2; }
+  .project-link-card { @apply flex min-h-16 items-center justify-between gap-4 rounded-xl border border-ink/10 bg-white p-4 font-bold text-brand no-underline shadow-soft transition hover:-translate-y-0.5 hover:border-school-cyan hover:text-school-magenta; }
+  .project-link-type { @apply shrink-0 text-right text-[0.65rem] font-bold uppercase tracking-[0.1em] text-ink/50; }
+  .project-partners-list { @apply mt-6 grid gap-x-8 gap-y-3 border-t border-ink/10 pt-5 md:grid-cols-2; }
+  .project-partners-list li { @apply text-sm leading-6 text-ink/80; }
+  .project-partners-list a { @apply font-semibold text-brand hover:text-school-magenta; }
+  .section-label { @apply flex items-center gap-3 text-xs font-bold uppercase tracking-[0.16em] text-brand; }
+  .section-label::before { content: ''; @apply h-px w-8 bg-school-cyan; }
+  .info-panel { @apply rounded-xl border border-ink/10 bg-mist/70 p-5 sm:p-6; }
+  .meta-label { @apply text-xs font-bold uppercase tracking-[0.14em] text-brand; }
+  .color-rule { @apply h-1 rounded-full; background: linear-gradient(90deg, #1A4053 0 20%, #59BDDC 20% 40%, #ECAFAC 40% 60%, #D0D543 60% 80%, #C42079 80% 100%); }
+  .event-section-list { @apply grid gap-4; }
+  .event-preview { @apply relative grid gap-4 border-l-4 p-4 transition hover:-translate-y-0.5 hover:shadow-soft sm:grid-cols-[5.5rem_minmax(0,1fr)] sm:items-center sm:p-5; border-left-color: var(--event-accent, #6B7280); }
+  .event-preview-multi-day { border-left-color: var(--event-accent, #6B7280); }
+  .event-preview-date { @apply flex items-center gap-2 rounded-xl bg-mist px-3 py-2 text-brand sm:block sm:px-3 sm:py-3; }
+  .event-preview-date-day { @apply font-display text-2xl font-bold leading-none; }
+  .event-preview-date-month { @apply text-xs font-bold uppercase tracking-wide text-ink/60 sm:mt-1 sm:block; }
+  .event-preview-date-range { @apply ml-auto text-lg font-bold text-school-cyan sm:mt-2 sm:block; }
+  .event-preview-kicker { @apply text-xs font-bold uppercase tracking-[0.14em] text-brand; }
+  .event-preview-title { @apply mt-1 text-lg sm:text-xl; }
+  .event-preview-title a { @apply no-underline hover:text-school-magenta; }
+  .event-preview-excerpt { @apply mt-2 max-w-3xl leading-7 text-ink/70; }
+  .event-preview-calendar-tags { @apply mt-2 text-xs font-bold text-ink/60; }
+  .event-meta { @apply mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-ink/70; }
+  .event-meta-date { @apply font-bold text-night; }
+  .event-meta-location { @apply before:mr-3 before:text-ink/30 before:content-['·']; }
+  .event-meta-tags { @apply flex flex-wrap gap-1.5; }
+  .event-tag { @apply rounded-sm border border-ink/10 bg-mist px-2 py-1 text-xs font-semibold text-brand no-underline hover:border-school-cyan hover:bg-school-cyan/15; }
+  .event-meta-compact { @apply mt-2 text-xs; }
+  .event-meta-compact .event-meta-tags { @apply hidden; }
+  .event-list { @apply mt-5 grid gap-4; }
+  .event-list-item[hidden] { display: none; }
+  .event-list-empty { @apply mt-5; }
+  .event-filters { @apply rounded-2xl border border-ink/10 bg-white p-4 shadow-soft; }
+  .event-filter-toolbar { @apply flex flex-wrap items-center gap-3; }
+  .event-filter-heading { @apply flex min-w-max items-center gap-3; }
+  .event-filter-heading .eyebrow { @apply mb-0; }
+  .event-filter-count { @apply rounded-full bg-mist px-2.5 py-1 text-xs font-bold text-ink/60; }
+  .event-filter-form { @apply min-w-0 flex-1; }
+  .event-filter-input { @apply min-h-10 w-full rounded-xl border border-ink/15 bg-paper px-3 py-2 text-sm text-ink outline-none transition placeholder:text-ink/45 focus:border-school-cyan focus:ring-2 focus:ring-school-cyan/20; }
+  .event-filter-clear { @apply shrink-0 text-sm font-bold text-brand underline decoration-brand/40 underline-offset-4 hover:text-school-magenta; }
+  .event-active-filters { @apply mt-3 flex flex-wrap items-center gap-2; }
+  .event-active-filters[hidden] { display: none; }
+  .event-active-filters-label { @apply text-xs font-bold uppercase tracking-[0.12em] text-ink/55; }
+  .event-active-filter { @apply rounded-full bg-brand px-3 py-1.5 text-xs font-bold text-white no-underline hover:bg-school-magenta; }
+  .event-calendar { @apply min-w-0; }
+  .event-calendar-weekdays { @apply grid grid-cols-7 border-b border-ink/10 bg-mist text-center text-xs font-bold uppercase tracking-wide text-ink/60; }
+  .event-calendar-weekdays span { @apply px-1 py-3; }
+  .event-calendar-grid { @apply grid grid-cols-7; }
+  .event-calendar-cell { @apply min-h-20 border-b border-r border-ink/10 p-1.5 last:border-r-0 sm:min-h-24 sm:p-2; }
+  .event-calendar-cell:nth-child(7n) { @apply border-r-0; }
+  .event-calendar-cell-empty { @apply bg-paper/60; }
+  .event-calendar-day { @apply relative z-0 flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-ink transition hover:bg-mist disabled:pointer-events-none disabled:opacity-0; }
+  .event-calendar-day::before { content: ''; @apply absolute inset-0 -z-10 rounded-full border-2 border-transparent transition; }
+  .event-calendar-day-has-event::before { border-color: var(--event-day-color, #6B7280); }
+  .event-calendar-day-event-start { color: var(--event-day-text, #FFFFFF); }
+  .event-calendar-day-event-start::before { background: var(--event-day-color, #6B7280); }
+  .event-calendar-day-overlap::after { content: ''; @apply absolute -inset-1 -z-20 rounded-full border border-current; color: var(--event-day-color, #6B7280); }
+  .event-calendar-day-today { @apply outline outline-2 outline-offset-2 outline-accent; }
+  .event-calendar-day-selected { @apply outline outline-2 outline-offset-2 outline-brand; }
+  .event-calendar-legend-start, .event-calendar-legend-continuing, .event-calendar-legend-overlap { @apply mr-1 inline-flex h-6 w-6 items-center justify-center rounded-full text-[0.65rem] font-bold; }
+  .event-calendar-legend-start { @apply bg-brand text-white; }
+  .event-calendar-legend-continuing { @apply border-2 border-brand text-brand; }
+  .event-calendar-legend-overlap { @apply border-2 border-brand text-brand ring-1 ring-brand ring-offset-1; }
+  .event-calendar-legend-today { @apply rounded bg-accent/30 px-1.5 py-0.5 text-xs font-bold text-brand; }
+  .event-attachments { @apply mt-12 border-t border-ink/10 pt-10; }
+  .event-attachment-type { @apply grid h-10 w-12 shrink-0 place-items-center rounded-lg bg-brand text-[0.65rem] font-bold text-white; }
+  .event-dialog { @apply m-auto w-[min(92vw,60rem)] max-w-none rounded-3xl border-0 bg-paper p-0 text-ink shadow-2xl; max-height: 90vh; }
+  .event-dialog::backdrop { @apply bg-night/70; }
+  .event-dialog-shell { @apply relative max-h-[90vh] overflow-y-auto; }
+  .event-dialog-close-form { @apply sticky right-0 top-0 z-10 flex justify-end p-3; }
+  .event-dialog-close { @apply grid h-11 w-11 place-items-center rounded-full bg-night text-3xl leading-none text-white shadow-soft transition hover:bg-brand; }
+  .event-dialog-header { @apply -mt-14 border-b border-ink/10 px-6 pb-7 pt-16 sm:px-10; }
+  .event-dialog-body { @apply px-6 pb-8 sm:px-10 sm:pb-12; }
+  .event-dialog-body > .prose-school { @apply max-w-none; }
+  body.event-dialog-open { overflow: hidden; }
+}
+
+.section-hub-card h2 {
+  font-weight: 800;
+  color: #0cc6de;
+} 
+
+.person-card-compact {
+  display: grid;
+  grid-template-columns: 3.75rem minmax(0, 1fr);
+  align-items: start;
+  column-gap: 1rem;
+  padding: 1rem;
+  height: 100%;
+  width: 100%;
+}
+
+.person-card-compact:not(.person-card-has-photo) {
+  display: block;
+  padding: 1rem;
+}
+
+.people-list-compact > .people-list-entry {
+  display: flex;
+}
+
+.person-card-contact-row {
+  grid-column: 1 / -1;
+  min-width: 0;
+  margin-top: .85rem;
+  border-top: 1px solid rgb(38 52 59 / 12%);
+  padding-top: .65rem;
+}
+
+.person-card-contact-row .person-meta {
+  margin-top: 0;
+  gap: .25rem;
+}
+
+.contact-page-heading {
+  padding-top: 2.25rem;
+  padding-bottom: 1.25rem;
+  text-align: center;
+}
+
+.contact-page-title {
+  margin: 0;
+  color: #1a4053;
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.people-section-heading {
+  margin-bottom: 1rem;
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.people-section-heading h2 {
+  margin: 0;
+  color: rgb(38 52 59 / 62%);
+  font-size: .82rem;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.person-dialog-contact-row {
+  width: 100%;
+  border-top: 1px solid rgb(38 52 59 / 14%);
+  padding: .95rem 1.5rem 1rem;
+}
+
+.person-dialog-contact-row .person-meta {
+  max-width: 22rem;
+  margin: 0 auto;
+  gap: .35rem;
+  text-align: left;
+}
+
+/* The IT detail hero uses a fixed cyan background rather than ProgramHero's accent prop. */
+div[class*='bg-[#59BDDC]'] h1.text-white,
+div[class*='bg-[#59BDDC]'] p.text-white { color: #08243A; }
+div[class*='bg-[#59BDDC]'] a {
+  border-color: rgb(8 36 58 / 18%);
+  background-color: rgb(8 36 58 / 10%);
+  color: #08243A;
+}
+div[class*='bg-[#59BDDC]'] a:hover { background-color: #FFFFFF; }
+
+@media (min-width: 640px) {
+  .contact-page-title { font-size: 2.25rem; }
+}
+
+@media (min-width: 1024px) {
+  .people-list-compact { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .article-body-columns { columns: 2; column-gap: 3.5rem; }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .people-list-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  .news-card-homepage-image, .program-card-image { animation: none; transform: none; }
+}
+
+@media (max-width: 420px) {
+  .hero-tab { @apply min-h-12 px-3 py-3 text-[0.68rem] tracking-[0.04em]; }
+}
+
+/* Shared accessibility rules: keep focus and content visible at narrow widths. */
+:focus-visible {
+  outline: 3px solid #08243A !important;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px #fff !important;
+}
+#main-content:focus { outline: none !important; box-shadow: none !important; }
+h1, h2, h3, p, a { overflow-wrap: anywhere; }
+.mobile-menu-dialog {
+  position: fixed;
+  inset: 0 0 0 auto;
+  margin: 0;
+  width: min(29rem, calc(100vw - 1rem));
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  border: 0;
+  padding: 1.25rem;
+  background: #fff;
+  color: #26343B;
+  overflow-y: auto;
+}
+.mobile-menu-dialog::backdrop { background: rgb(8 36 58 / 60%); }
+.mobile-menu-dialog nav > a:first-child { font-size: .9rem; font-weight: 400; letter-spacing: .04em; text-transform: uppercase; }
+.gallery-dialog { max-height: 92dvh; overflow-y: auto; }
+.prose-school img { max-width: 100%; height: auto; }
+.prose-school pre { max-width: 100%; overflow-x: auto; }
+.prose-school table { display: block; max-width: 100%; overflow-x: auto; }
+.section-hub-card span[class*='text-ink/45'] { color: #52616a; }
+#program-why-title, #program-study-title, #program-classrooms-title { color: #1A4053 !important; }
+.person-meta-link { padding-block: .2rem; }
+@media (max-width: 639px) {
+  .page-hero-shell-with-icon { gap: .75rem; }
+  header .container-page { gap: .5rem; }
+  header .container-page > a img { max-width: calc(100vw - 9rem); }
+}
+
+@media (max-width: 640px) {
+  .event-calendar-cell { min-height: 4.75rem; padding: .25rem; }
+  .event-calendar-day { height: 2rem; width: 2rem; font-size: .75rem; }
+}
+body:has(dialog[open]) { overflow: hidden; }
+.prose-school iframe { max-width: 100%; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; } }

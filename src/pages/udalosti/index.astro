@@ -1,0 +1,43 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import EventCalendar from '../../components/events/EventCalendar.astro';
+import EventFilters from '../../components/events/EventFilters.astro';
+import EventList from '../../components/events/EventList.astro';
+import PageHero from '../../components/content/PageHero.astro';
+import { EVENT_TAG_OPTIONS } from '../../data/eventTags';
+import { currentMonthKey, eventMatchesPrograms, eventMatchesTags, eventOccursInMonth, eventOccursOn, eventStartKey } from '../../lib/events';
+import { entries } from '../../lib/content';
+import { heroImages } from '../../data/heroImages';
+
+const [allEvents, programs] = await Promise.all([entries('events'), entries('programs')]);
+const selectedTags = [...new Set(Astro.url.searchParams.getAll('stitky').flatMap((value) => value.split(',')).filter(Boolean))];
+const selectedPrograms = [...new Set(Astro.url.searchParams.getAll('obor').flatMap((value) => value.split(',')).filter(Boolean))];
+const requestedMonth = Astro.url.searchParams.get('mesic') ?? '';
+const selectedMonth = /^\d{4}-\d{2}$/.test(requestedMonth) ? requestedMonth : currentMonthKey();
+const requestedDay = Astro.url.searchParams.get('den') ?? '';
+const selectedDay = /^\d{4}-\d{2}-\d{2}$/.test(requestedDay) ? requestedDay : '';
+const filteredEvents = allEvents
+  .filter((event) => eventMatchesTags(event, selectedTags))
+  .filter((event) => eventMatchesPrograms(event, selectedPrograms))
+  .filter((event) => eventOccursInMonth(event, selectedMonth))
+  .filter((event) => !selectedDay || eventOccursOn(event, selectedDay))
+  .sort((a, b) => eventStartKey(a).localeCompare(eventStartKey(b)));
+---
+<BaseLayout title="Kalendář akcí" description="Nejbližší akce SŠPU Opava: dny otevřených dveří, výstavy, školní termíny a setkání s praxí.">
+  <PageHero eyebrow="Škola" title="Kalendář akcí" description="Procházejte akce podle měsíce, štítků nebo oboru. U každé události najdete termín, místo a další informace." accent="#D0D543" icon={heroImages.calendar} />
+  <section class="container-page pb-16 sm:pb-20" data-pagefind-body>
+    <span class="sr-only" data-pagefind-filter="typ">Přehled událostí</span>
+    <div class="mt-10 grid gap-8 lg:grid-cols-2 lg:items-start">
+      <EventCalendar events={allEvents} initialMonth={selectedMonth} />
+      <div>
+        <EventFilters tags={EVENT_TAG_OPTIONS} programs={programs.map((program) => ({ id: program.id, title: program.data.title }))} selectedTags={selectedTags} selectedPrograms={selectedPrograms} selectedMonth={selectedMonth} selectedDay={selectedDay} resultCount={filteredEvents.length} />
+        {/**
+         * GitHub Pages serves this route as static HTML. Query parameters therefore
+         * cannot determine the server-rendered list; the client-side calendar
+         * synchronizes this complete fallback list with the active filters.
+         */}
+        <EventList events={allEvents} variant="compact" monthFilter={true} />
+      </div>
+    </div>
+  </section>
+</BaseLayout>

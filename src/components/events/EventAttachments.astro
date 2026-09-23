@@ -1,0 +1,19 @@
+---
+import type { EventEntry } from '../../lib/events';
+import AttachmentLink from '../content/AttachmentLink.astro';
+
+const { attachments } = Astro.props as { attachments: EventEntry['data']['attachments'] };
+const extension = (file: string) => file.split('?')[0].split('.').pop()?.toUpperCase() ?? 'SOUBOR';
+---
+{attachments.length > 0 && <section class="event-attachments" aria-labelledby="event-attachments-title">
+  <p class="eyebrow">Ke stažení</p>
+  <h2 id="event-attachments-title" class="mt-2 text-2xl">Přílohy</h2>
+  <ul class="mt-5 grid gap-3">
+    {attachments.map((attachment) => <li>
+      <AttachmentLink label={attachment.label} url={attachment.file} description={attachment.description} class="event-attachment card flex items-start gap-4 p-4 no-underline transition hover:-translate-y-0.5 hover:shadow-soft">
+        <span class="event-attachment-type" aria-hidden="true">{extension(attachment.file)}</span>
+        <span class="min-w-0"><strong class="block break-words text-night">{attachment.label}</strong>{attachment.description && <span class="mt-1 block break-words text-sm leading-6 text-ink/70">{attachment.description}</span>}</span>
+      </AttachmentLink>
+    </li>)}
+  </ul>
+</section>}

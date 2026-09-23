@@ -1,0 +1,22 @@
+---
+import type { HeroAction } from '../../data/heroTabs';
+import { withBase } from '../../lib/content';
+
+interface Props { actions: HeroAction[]; primaryColor?: string; primaryTextColor?: string }
+const { actions, primaryColor = '#D0D543', primaryTextColor = '#08243A' } = Astro.props;
+---
+
+{actions.length > 0 && <div class="mt-6 flex flex-wrap gap-3">
+  {actions.map((action) => <a
+    href={action.external ? action.href : withBase(action.href)}
+    target={action.external ? '_blank' : undefined}
+      rel={action.external ? 'noreferrer' : undefined}
+    style={action.variant === 'primary' ? `--hero-action-bg:${primaryColor};--hero-action-text:${primaryTextColor}` : undefined}
+    class:list={[
+      'inline-flex min-h-11 items-center justify-center rounded-lg px-5 py-2.5 text-sm font-semibold no-underline transition',
+      action.variant === 'primary' && 'hero-action-primary',
+      action.variant === 'secondary' && 'border border-white/35 bg-night/15 text-white hover:bg-white hover:text-night',
+      action.variant === 'text' && 'text-white underline decoration-white/50 underline-offset-4 hover:text-accent'
+    ]}
+  >{action.label}{action.external && <span aria-hidden="true" class="ml-1">↗</span>}</a>)}
+</div>}

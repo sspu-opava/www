@@ -1,0 +1,52 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import AttachmentModal from '../components/content/AttachmentModal.astro';
+import { withBase } from '../lib/content';
+import { canonicalPath, withoutBase, safeJson } from '../lib/urls.mjs';
+
+interface Crumb { label: string; href?: string }
+interface Seo { title?: string; description?: string; canonical?: string; image?: string; noindex?: boolean }
+interface Props { title?: string; description?: string; breadcrumbs?: Crumb[]; showBreadcrumbs?: boolean; schema?: Record<string, unknown>; seo?: Seo; image?: string }
+const { title = 'SŠPU Opava', description = 'Moderní web Střední školy průmyslové a umělecké Opava.', schema, seo, image } = Astro.props;
+const resolvedTitle = seo?.title || title;
+const resolvedDescription = seo?.description || description;
+const pageTitle = resolvedTitle === 'SŠPU Opava' ? resolvedTitle : `${resolvedTitle} | SŠPU Opava`;
+const pathname = withoutBase(Astro.url.pathname, import.meta.env.BASE_URL);
+const canonical = seo?.canonical || new URL(withBase(canonicalPath(pathname)), Astro.site ?? Astro.url.origin).href;
+const ogImage = new URL(withBase(seo?.image || image || '/images/sspu-logo.png'), Astro.site ?? Astro.url.origin).href;
+const publicSite = Astro.site ?? Astro.url.origin;
+const organization = {
+  '@context': 'https://schema.org', '@type': 'EducationalOrganization', name: 'Střední škola průmyslová a umělecká, Opava',
+  url: new URL(import.meta.env.BASE_URL, publicSite).href, telephone: '+420553621580', email: 'sspu@sspu-opava.cz',
+  address: { '@type': 'PostalAddress', streetAddress: 'Praskova 399/8', addressLocality: 'Opava', postalCode: '746 01', addressCountry: 'CZ' }
+};
+---
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={resolvedDescription} />
+    {seo?.noindex && <meta name="robots" content="noindex, follow" />}
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content={schema?.['@type'] === 'NewsArticle' ? 'article' : 'website'} /><meta property="og:title" content={pageTitle} /><meta property="og:description" content={resolvedDescription} /><meta property="og:url" content={canonical} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="alternate" type="application/rss+xml" title="SŠPU Opava – aktuality" href={withBase('/rss.xml')} />
+    <link rel="icon" type="image/png" href={withBase('/images/sspu-logo.png')} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <title>{pageTitle}</title>
+    <script is:inline type="application/ld+json" set:html={safeJson(organization)} />
+    {schema && <script is:inline type="application/ld+json" set:html={safeJson(schema)} />}
+  </head>
+  <body>
+    <Header />
+    <main id="main-content" tabindex="-1" data-pagefind-body={!seo?.noindex ? true : undefined}><slot /></main>
+    <Footer />
+    <AttachmentModal />
+  </body>
+</html>

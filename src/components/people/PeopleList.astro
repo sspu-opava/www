@@ -1,0 +1,32 @@
+---
+import type { PersonEntry } from '../../lib/people';
+import PersonCard from './PersonCard.astro';
+import PersonDialog from './PersonDialog.astro';
+
+interface Props {
+  people: PersonEntry[];
+  variant?: 'vertical' | 'compact' | 'list';
+  showPhoto?: boolean;
+  showPhone?: boolean;
+  showWorkplace?: boolean;
+  showStudyFields?: boolean;
+  includeDialogs?: boolean;
+}
+
+const {
+  people,
+  variant = 'vertical',
+  showPhoto = true,
+  showPhone = false,
+  showWorkplace = true,
+  showStudyFields = false,
+  includeDialogs = true
+} = Astro.props as Props;
+---
+
+<div class:list={["people-list", `people-list-${variant}`]}>
+  {people.map((person) => <div class="people-list-entry">
+    <PersonCard person={person} variant={variant} showPhoto={showPhoto} showPhone={showPhone} showWorkplace={showWorkplace} showStudyFields={showStudyFields} />
+    {includeDialogs && <PersonDialog person={person} />}
+  </div>)}
+</div>

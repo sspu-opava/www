@@ -1,0 +1,17 @@
+{
+  "origin": "https://www.sspu-opava.cz",
+  "description": "Dosavadní školní web hostuje archivní materiály, které nejsou součástí tohoto prototypu. Před převzetím stejné domény je nutná migrace těchto cest.",
+  "pathPrefixes": [
+    "/media/",
+    "/static/"
+  ],
+  "pages": [
+    "/cs/studium/anglicka-knihovna/",
+    "/cs/moderni-technologie/",
+    "/cs/dokumenty/",
+    "/cs/jak-se-pripravit-ke-studiu-na-umeleckych-oborech/",
+    "/cs/studium/",
+    "/cs/zpravy/s-erasmem-az-na-ostrovy",
+    "/cs/zpravy/zahranicni-staze-zaku-technickych-oboru"
+  ]
+}

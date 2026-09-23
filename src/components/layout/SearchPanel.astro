@@ -1,0 +1,59 @@
+---
+import { withBase } from '../../lib/content';
+---
+
+<div class="relative shrink-0" data-search-root>
+  <button
+    type="button"
+    class="grid h-10 w-10 place-items-center rounded-lg text-night transition hover:bg-mist hover:text-brand"
+    aria-label="Hledat na webu"
+    aria-expanded="false"
+    aria-controls="site-search-panel"
+    data-search-trigger
+  >
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 5 5" /></svg>
+  </button>
+  <div id="site-search-panel" class="absolute right-0 top-[calc(100%+.75rem)] z-[70] w-[min(25rem,calc(100vw-2.5rem))] rounded-xl border border-ink/10 bg-white p-5 shadow-lift" data-search-panel hidden>
+    <form action={withBase('/vyhledavani/')} method="get" role="search" class="grid gap-3">
+      <label for="site-search-input" class="text-sm font-bold text-night">Hledat na webu</label>
+      <div class="flex gap-2">
+        <input id="site-search-input" name="q" type="search" class="min-h-12 min-w-0 flex-1 rounded-lg border border-ink/15 bg-paper px-4 text-base placeholder:text-ink/45" placeholder="Zadejte hledaný výraz" data-search-input />
+        <button type="submit" class="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-night text-white transition hover:bg-brand" aria-label="Hledat">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 5 5" /></svg>
+        </button>
+      </div>
+      <button type="button" class="justify-self-start text-sm font-bold text-brand underline-offset-4 hover:text-night hover:underline" data-search-close>Zavřít</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  const searchRoot = document.querySelector('[data-search-root]');
+  const searchTrigger = searchRoot?.querySelector('[data-search-trigger]');
+  const searchPanel = searchRoot?.querySelector('[data-search-panel]');
+  const searchInput = searchRoot?.querySelector('[data-search-input]');
+  const searchClose = searchRoot?.querySelector('[data-search-close]');
+
+  const closeSearch = (restoreFocus = true) => {
+    if (!(searchTrigger instanceof HTMLButtonElement) || !(searchPanel instanceof HTMLElement)) return;
+    searchTrigger.setAttribute('aria-expanded', 'false');
+    searchPanel.hidden = true;
+    if (restoreFocus) searchTrigger.focus();
+  };
+
+  searchTrigger?.addEventListener('click', () => {
+    if (!(searchTrigger instanceof HTMLButtonElement) || !(searchPanel instanceof HTMLElement)) return;
+    const willOpen = searchTrigger.getAttribute('aria-expanded') !== 'true';
+    searchTrigger.setAttribute('aria-expanded', String(willOpen));
+    searchPanel.hidden = !willOpen;
+    if (willOpen && searchInput instanceof HTMLInputElement) window.requestAnimationFrame(() => searchInput.focus());
+  });
+  searchClose?.addEventListener('click', () => closeSearch());
+  document.addEventListener('click', (event) => {
+    if (event.target instanceof Node && searchRoot?.contains(event.target)) return;
+    if (searchTrigger instanceof HTMLButtonElement && searchTrigger.getAttribute('aria-expanded') === 'true') closeSearch(false);
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && searchTrigger instanceof HTMLButtonElement && searchTrigger.getAttribute('aria-expanded') === 'true') closeSearch();
+  });
+</script>

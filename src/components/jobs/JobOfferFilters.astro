@@ -1,0 +1,71 @@
+---
+interface Option {
+  value: string;
+  label: string;
+}
+
+interface Props {
+  types: Option[];
+  statuses: Option[];
+  locations: string[];
+  fields: string[];
+}
+
+const { types, statuses, locations, fields } = Astro.props as Props;
+---
+
+<section class="job-offer-filters" aria-labelledby="job-offer-filters-title" data-job-offer-filters>
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <p class="section-label">Výběr nabídek</p>
+      <h2 id="job-offer-filters-title" class="mt-3 text-2xl sm:text-3xl">Najděte nabídku podle firmy, oboru nebo místa</h2>
+    </div>
+    <button type="button" class="job-offer-filter-clear" data-job-offer-filter-clear>Vymazat filtry</button>
+  </div>
+
+  <form class="job-offer-filter-grid" data-job-offer-filter-form>
+    <label>Hledat podle firmy nebo pozice<input type="search" name="query" placeholder="Např. programátor nebo FERRAM" autocomplete="off" data-job-offer-query /></label>
+    <label>Typ nabídky<select name="type" data-job-offer-type-filter><option value="">Všechny typy</option>{types.map((option) => <option value={option.value}>{option.label}</option>)}</select></label>
+    <label>Lokalita<select name="location" data-job-offer-location-filter><option value="">Všechny lokality</option><option value="__empty__">Lokalita neuvedena</option>{locations.map((location) => <option value={location}>{location}</option>)}</select></label>
+    <label>Oblast<select name="field" data-job-offer-field-filter><option value="">Všechny oblasti</option><option value="__empty__">Oblast neuvedena</option>{fields.map((field) => <option value={field}>{field}</option>)}</select></label>
+    <label>Stav<select name="status" data-job-offer-status-filter><option value="">Všechny stavy</option>{statuses.map((option) => <option value={option.value}>{option.label}</option>)}</select></label>
+  </form>
+
+  <p class="job-offer-filter-result" aria-live="polite" data-job-offer-filter-result></p>
+  <noscript><p class="mt-4 text-sm text-ink/70">Bez JavaScriptu zůstávají zobrazené všechny nabídky. Filtrování je dostupné po jeho zapnutí.</p></noscript>
+</section>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-job-offer-filters]');
+  const form = root?.querySelector<HTMLFormElement>('[data-job-offer-filter-form]');
+  const cards = [...document.querySelectorAll<HTMLElement>('[data-job-offer-card]')];
+  const result = root?.querySelector<HTMLElement>('[data-job-offer-filter-result]');
+  const query = root?.querySelector<HTMLInputElement>('[data-job-offer-query]');
+  const type = root?.querySelector<HTMLSelectElement>('[data-job-offer-type-filter]');
+  const location = root?.querySelector<HTMLSelectElement>('[data-job-offer-location-filter]');
+  const field = root?.querySelector<HTMLSelectElement>('[data-job-offer-field-filter]');
+  const status = root?.querySelector<HTMLSelectElement>('[data-job-offer-status-filter]');
+  const clear = root?.querySelector<HTMLButtonElement>('[data-job-offer-filter-clear]');
+
+  const matchesValue = (selected: string, actual: string | undefined) => !selected || (selected === '__empty__' ? !actual : actual === selected);
+
+  const apply = () => {
+    const needle = query?.value.trim().toLocaleLowerCase('cs-CZ') || '';
+    let visible = 0;
+    cards.forEach((card) => {
+      const matches = (!needle || (card.dataset.jobOfferSearch || '').toLocaleLowerCase('cs-CZ').includes(needle))
+        && matchesValue(type?.value || '', card.dataset.jobOfferType)
+        && matchesValue(location?.value || '', card.dataset.jobOfferLocation)
+        && matchesValue(field?.value || '', card.dataset.jobOfferField)
+        && matchesValue(status?.value || '', card.dataset.jobOfferStatus);
+      card.hidden = !matches;
+      if (matches) visible += 1;
+    });
+    if (result) result.textContent = `Zobrazeno nabídek: ${visible} z ${cards.length}.`;
+  };
+
+  form?.addEventListener('input', apply);
+  form?.addEventListener('change', apply);
+  clear?.addEventListener('click', () => { form?.reset(); apply(); query?.focus(); });
+  apply();
+</script>

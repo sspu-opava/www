@@ -1,0 +1,47 @@
+---
+import type { PersonEntry } from '../../lib/people';
+import { isPersonVisible } from '../../lib/people';
+import PeopleList from './PeopleList.astro';
+
+interface Props {
+  people: PersonEntry[];
+  eyebrow?: string;
+  title?: string;
+  description?: string;
+  variant?: 'vertical' | 'compact' | 'list';
+  showPhoto?: boolean;
+  showPhone?: boolean;
+  showWorkplace?: boolean;
+  showStudyFields?: boolean;
+  includeDialogs?: boolean;
+  groups?: string[];
+  class?: string;
+}
+
+const {
+  people,
+  eyebrow,
+  title,
+  description,
+  variant = 'vertical',
+  showPhoto = true,
+  showPhone = false,
+  showWorkplace = true,
+  showStudyFields = false,
+  includeDialogs = true,
+  groups = [],
+  class: className
+} = Astro.props as Props;
+const visiblePeople = people
+  .filter((person) => groups.length === 0 || groups.some((group) => person.data.groups.includes(group)))
+  .filter((person) => isPersonVisible(person.data));
+---
+
+{visiblePeople.length > 0 && <section class:list={["people-section", className]}>
+  {(eyebrow || title || description) && <header class="people-section-heading">
+    {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+    {title && <h2 class="mt-2">{title}</h2>}
+    {description && <p class="mt-4 max-w-2xl leading-7 text-ink/75">{description}</p>}
+  </header>}
+  <PeopleList people={visiblePeople} variant={variant} showPhoto={showPhoto} showPhone={showPhone} showWorkplace={showWorkplace} showStudyFields={showStudyFields} includeDialogs={includeDialogs} />
+</section>}

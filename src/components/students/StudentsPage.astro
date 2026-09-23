@@ -1,0 +1,33 @@
+---
+import { byId, entries } from '../../lib/content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../content/PageHero.astro';
+import ContentRenderer from '../content/ContentRenderer.astro';
+import { heroImages } from '../../data/heroImages';
+import PersonDialog from '../people/PersonDialog.astro';
+import { findPersonByDisplayName, normalizePersonText } from '../../lib/people';
+
+const page = await byId('pages', 'zaci-tridy');
+if (!page) throw new Error('Chybí obsahová stránka Žáci a třídy.');
+const people = await entries('people');
+const teacherNames = page.data.contentBlocks.flatMap((block) => {
+  if (block.type !== 'table') return [];
+  const teacherColumn = block.headers.findIndex((header) => normalizePersonText(header) === 'tridni ucitel');
+  if (teacherColumn < 0) return [];
+  return block.rows
+    .map((row) => (Array.isArray(row) ? row : row.cells)[teacherColumn])
+    .filter((cell): cell is string => typeof cell === 'string');
+});
+const classTeachers = teacherNames
+  .map((name) => findPersonByDisplayName(people, name))
+  .filter((person): person is (typeof people)[number] => Boolean(person))
+  .filter((person, index, all) => all.findIndex((candidate) => candidate.id === person.id) === index);
+---
+<BaseLayout title={page.data.title} description={page.data.description} seo={page.data.seo} breadcrumbs={[{ label: 'Studenti a rodiče', href: '/studenti/' }, { label: page.data.title }]}>
+  <PageHero eyebrow={page.data.eyebrow ?? 'Pro studenty'} title={page.data.title} description={page.data.highlight} accent="#59BDDC" icon={heroImages.students} iconBackground="#001731" />
+  <section class="container-page pb-14 sm:pb-20" data-pagefind-body>
+    <span class="sr-only" data-pagefind-filter="typ">Stránka</span>
+    <div class="mt-10"><ContentRenderer blocks={page.data.contentBlocks} /></div>
+    {classTeachers.map((person) => <PersonDialog person={person} />)}
+  </section>
+</BaseLayout>

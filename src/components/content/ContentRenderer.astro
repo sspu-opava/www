@@ -1,0 +1,139 @@
+---
+import ResponsiveImage from '../ResponsiveImage.astro';
+import GalleryLightbox from '../GalleryLightbox.astro';
+import ArticleSection from '../news/ArticleSection.astro';
+import PersonCard from '../people/PersonCard.astro';
+import AttachmentList from './AttachmentList.astro';
+import AttachmentLink from './AttachmentLink.astro';
+import { entries, withBase } from '../../lib/content';
+import { findPersonByDisplayName, normalizePersonText } from '../../lib/people';
+import { renderMarkdown } from '../../lib/markdown.mjs';
+
+type TextItem = { title: string; text: string };
+type TableRow = string[] | { cells: string[] };
+type ResourceItem = { label: string; url: string; description?: string; kind?: 'external' | 'document' };
+type ResourceSeries = { urlTemplate: string; labelTemplate?: string; count: number; start?: number; pad?: number; kind?: 'external' | 'document' };
+type ResourceGroup = { title: string; category?: string; description?: string; items: ResourceItem[]; series: ResourceSeries[] };
+type Block =
+  | { type: 'heading'; level?: 'h2' | 'h3'; text: string }
+  | { type: 'text'; title?: string; text: string }
+  | { type: 'richText'; title?: string; text: string }
+  | { type: 'image'; image: string; alt: string; caption?: string }
+  | { type: 'youtube'; url: string; title?: string }
+  | { type: 'audio'; src: string; title?: string }
+  | { type: 'table'; caption?: string; headers: string[]; rows: TableRow[] }
+  | { type: 'notice'; title: string; text: string }
+  | { type: 'cta'; title: string; text: string; label: string; href: string }
+  | { type: 'columns' | 'twoColumns' | 'threeColumns'; items: TextItem[] }
+  | { type: 'gallery'; gallery: string }
+  | { type: 'documents'; documents: string[] }
+  | { type: 'articles'; articles: string[] }
+  | { type: 'people'; people: string[]; showHeading?: boolean; eyebrow?: string; title?: string }
+  | { type: 'downloads'; eyebrow?: string; title?: string; showHeading?: boolean; variant?: 'default' | 'night'; items: { label: string; url: string; description?: string }[] }
+  | { type: 'links'; eyebrow?: string; title?: string; items: { label: string; url: string; description?: string; kind?: 'external' | 'document' }[] }
+  | { type: 'resourceGroups'; eyebrow?: string; title?: string; groups: ResourceGroup[] }
+  | { type: 'faq'; items: { question: string; answer: string }[] };
+
+const { blocks = [], legacyClass = 'prose-school' } = Astro.props as { blocks?: Block[]; legacyClass?: string };
+const [galleries, documents, articles, people] = await Promise.all([
+  blocks.some(block => block.type === 'gallery') ? entries('galleries') : [],
+  blocks.some(block => block.type === 'documents') ? entries('documents') : [],
+  blocks.some(block => block.type === 'articles') ? entries('articles') : [],
+  blocks.some(block => ['people', 'table'].includes(block.type)) ? entries('people') : []
+]);
+const selected = <T extends { id: string }>(items: T[], ids: string[]) => ids.flatMap(id => items.find(item => item.id === id) ?? []);
+const richText = new Map(await Promise.all(blocks.filter(block => block.type === 'richText').map(async block => [block, await renderMarkdown(block.text, import.meta.env.BASE_URL)] as const)));
+
+function youtubeEmbedUrl(value: string) {
+  try {
+    const url = new URL(value);
+    const host = url.hostname.replace(/^www\./, '');
+    if (host === 'youtu.be') return `https://www.youtube-nocookie.com/embed/${url.pathname.slice(1)}`;
+    if (host === 'youtube.com' || host === 'm.youtube.com') {
+      const id = url.pathname.startsWith('/embed/') ? url.pathname.split('/')[2] : url.searchParams.get('v');
+      return id ? `https://www.youtube-nocookie.com/embed/${id}` : undefined;
+    }
+  } catch {
+    return undefined;
+  }
+  return undefined;
+}
+
+function tableCells(row: TableRow) {
+  return Array.isArray(row) ? row : row.cells;
+}
+
+function expandResourceSeries(series: ResourceSeries) {
+  const start = series.start ?? 1;
+  const pad = series.pad ?? 2;
+  return Array.from({ length: series.count }, (_, offset) => {
+    const number = String(start + offset).padStart(pad, '0');
+    const replaceToken = (template: string) => template.replaceAll('{n}', number);
+    const url = replaceToken(series.urlTemplate);
+    return {
+      label: replaceToken(series.labelTemplate ?? url.split('/').pop() ?? `Materiál ${start + offset}`),
+      url,
+      kind: series.kind ?? 'document'
+    } satisfies ResourceItem;
+  });
+}
+
+function resourceItems(group: ResourceGroup): ResourceItem[] {
+  return [...group.items, ...group.series.flatMap(expandResourceSeries)];
+}
+
+const renderLegacyContent = blocks.length === 0;
+---
+
+{renderLegacyContent ? (legacyClass ? <div class={legacyClass}><slot /></div> : <slot />) :
+  blocks.map((block) => {
+    if (block.type === 'heading') {
+      return block.level === 'h3' ? <h3 class="content-block-heading mt-9 text-lg sm:text-xl">{block.text}</h3> : <h2 class="content-block-heading mt-10 text-2xl">{block.text}</h2>;
+    }
+    if (block.type === 'text') return <section class="content-block-text my-8 max-w-3xl">{block.title && <h2 class="mb-4 text-2xl">{block.title}</h2>}<div class="space-y-4 whitespace-pre-line text-base leading-8 text-ink/85">{block.text}</div></section>;
+    if (block.type === 'richText') return <section class="content-block-text my-8 max-w-3xl">{block.title && <h2 class="mb-4 text-2xl">{block.title}</h2>}<div class="prose-school" set:html={richText.get(block)} /></section>;
+    if (block.type === 'image') return <figure class="my-10"><ResponsiveImage src={block.image} sizes="(min-width: 1024px) 960px, 100vw" alt={block.alt} class="max-h-[42rem] w-full rounded-3xl object-cover shadow-soft" loading="lazy" />{block.caption && <figcaption class="mt-3 text-sm leading-6 text-ink/70">{block.caption}</figcaption>}</figure>;
+    if (block.type === 'youtube') {
+      const embed = youtubeEmbedUrl(block.url);
+      return embed ? <figure class="my-10"><iframe class="aspect-video w-full rounded-2xl border-0 bg-night shadow-soft" src={embed} title={block.title ?? 'Video na YouTube'} loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>{block.title && <figcaption class="mt-3 text-sm leading-6 text-ink/70">{block.title}</figcaption>}</figure> : <p class="my-8"><a href={block.url} rel="noopener">Otevřít video na YouTube</a></p>;
+    }
+    if (block.type === 'audio') return <figure class="my-8 rounded-2xl bg-mist p-5">{block.title && <figcaption class="mb-3 font-bold text-night">{block.title}</figcaption>}<audio class="w-full" controls preload="metadata" src={withBase(block.src)}>Váš prohlížeč nepodporuje přehrávání zvuku.</audio></figure>;
+    if (block.type === 'table') {
+      const teacherColumn = block.headers.findIndex((header) => normalizePersonText(header) === 'tridni ucitel');
+      return <div class="my-10 overflow-x-auto rounded-2xl border border-ink/10 shadow-soft"><table class="my-0 w-full min-w-[32rem] border-collapse text-left text-sm"><caption class="border-b border-ink/10 bg-mist px-4 py-3 text-left font-bold text-night">{block.caption}</caption><thead><tr>{block.headers.map((header) => <th class="border border-ink/15 bg-mist px-3 py-3 font-bold text-night">{header}</th>)}</tr></thead><tbody>{block.rows.map((row) => <tr>{tableCells(row).map((cell, column) => {
+        const person = column === teacherColumn ? findPersonByDisplayName(people, cell) : undefined;
+        return <td class="border border-ink/15 px-3 py-3 align-top">{person ? <a href={withBase(`/kontakt/${person.id}/`)} data-person-open={person.id} class="teacher-table-link">{cell}</a> : cell}</td>;
+      })}</tr>)}</tbody></table></div>;
+    }
+    if (block.type === 'notice') return <aside class="info-panel my-10 border-l-4 border-l-school-lime"><h2 class="text-2xl">{block.title}</h2><p class="mt-2 whitespace-pre-line leading-7">{block.text}</p></aside>;
+    if (block.type === 'cta') return <section class="content-callout my-10"><p class="eyebrow !text-accent">Důležitý odkaz</p><h2 class="mt-2 text-2xl text-white">{block.title}</h2><p class="mt-3 max-w-2xl whitespace-pre-line leading-7 text-white/75">{block.text}</p><a class="button-primary mt-6 !bg-accent !text-night hover:!bg-school-cyan" href={withBase(block.href)}>{block.label}</a></section>;
+    if (block.type === 'columns' || block.type === 'twoColumns' || block.type === 'threeColumns') return <section class:list={["my-10 grid gap-4", block.type === 'threeColumns' ? 'md:grid-cols-3' : 'md:grid-cols-2']}>
+      {block.items.map((item) => <div class="info-panel"><h2 class="text-2xl">{item.title}</h2><p class="mt-2 whitespace-pre-line leading-7">{item.text}</p></div>)}
+    </section>;
+    if (block.type === 'gallery') {
+      const gallery = galleries.find((item) => item.id === block.gallery);
+      return gallery && <section class="my-10"><div class="flex flex-wrap items-end justify-between gap-4"><div><p class="section-label">Galerie</p><h2 class="mt-2 text-2xl">{gallery.data.title}</h2><p class="mt-2 max-w-3xl leading-7 text-ink/75">{gallery.data.description}</p></div><a class="button-secondary" href={withBase(`/galerie/${gallery.id}/`)}>Celá galerie</a></div><div class="mt-6"><GalleryLightbox photos={gallery.data.photos} title={gallery.data.title} /></div></section>;
+    }
+    if (block.type === 'documents') {
+      const items = selected(documents, block.documents);
+      return items.length > 0 && <section class="my-10"><p class="section-label">Ke stažení</p><h2 class="mt-2 text-2xl">Dokumenty</h2><ul class="mt-5 grid gap-3">{items.map((item) => <li><AttachmentLink label={item.data.title} url={item.data.file} description={item.data.description} class="card block border-l-4 border-l-school-cyan p-5 no-underline hover:shadow-soft"><strong class="text-night">{item.data.title}</strong><span class="mt-1 block text-sm leading-6 text-ink/70">{item.data.description}</span></AttachmentLink></li>)}</ul></section>;
+    }
+    if (block.type === 'articles') {
+      const items = selected(articles, block.articles);
+      return items.length > 0 && <ArticleSection articles={items} eyebrow="Související" title="Aktuality" variant="compact" />;
+    }
+    if (block.type === 'people') {
+      const items = selected(people, block.people);
+      const showHeading = block.showHeading ?? true;
+      return items.length > 0 && <section class="my-10"><>{showHeading && <><p class="section-label">{block.eyebrow ?? 'Kontakty'}</p><h2 class="mt-2 text-2xl">{block.title ?? 'Na koho se obrátit'}</h2></>}</><div class:list={[showHeading ? 'mt-5' : 'mt-0', 'grid gap-4 sm:grid-cols-2']}>{items.map((item) => <PersonCard person={item} variant="compact" showPhoto showPhone showWorkplace interactive />)}</div></section>;
+    }
+    if (block.type === 'downloads') {
+      const showHeading = block.showHeading ?? true;
+      return <AttachmentList attachments={block.items} eyebrow={showHeading ? block.eyebrow : ''} title={showHeading ? block.title ?? 'Přílohy ke stažení' : ''} variant={block.variant} class="my-10" />;
+    }
+    if (block.type === 'links') return <section class="my-10"><p class="section-label">{block.eyebrow ?? 'Odkazy a dokumenty'}</p>{block.title && <h2 class="mt-2 text-2xl">{block.title}</h2>}<ul class="mt-5 grid gap-3 sm:grid-cols-2">{block.items.map((item) => <li>{item.kind === 'document' ? <AttachmentLink label={item.label} url={item.url} description={item.description} class="card flex h-full items-start gap-4 p-5 no-underline transition hover:-translate-y-0.5 hover:shadow-soft"><span class="event-attachment-type" aria-hidden="true">{item.url.split(/[?#]/)[0].split('.').pop()?.toUpperCase() ?? 'PDF'}</span><span class="min-w-0"><strong class="block text-night">{item.label}</strong>{item.description && <span class="mt-1 block text-sm leading-6 text-ink/70">{item.description}</span>}</span></AttachmentLink> : <a href={withBase(item.url)} target={item.url.startsWith('http') ? '_blank' : undefined} rel={item.url.startsWith('http') ? 'noopener' : undefined} class="card flex h-full items-start gap-4 p-5 no-underline transition hover:-translate-y-0.5 hover:shadow-soft"><span class="event-attachment-type bg-school-cyan/15 text-brand" aria-hidden="true">↗</span><span class="min-w-0"><strong class="block text-night">{item.label}</strong>{item.description && <span class="mt-1 block text-sm leading-6 text-ink/70">{item.description}</span>}</span></a>}</li>)}</ul></section>;
+    if (block.type === 'resourceGroups') return <section class="learning-materials my-12"><div class="max-w-3xl">{block.eyebrow && <p class="eyebrow">{block.eyebrow}</p>}{block.title && <h2 class="mt-2 text-2xl">{block.title}</h2>}</div><div class="mt-6 grid gap-7">{block.groups.map((group, groupIndex) => { const items = resourceItems(group); const isNewCategory = group.category && block.groups[groupIndex - 1]?.category !== group.category; return <div>{isNewCategory && <h3 class="learning-material-category">{group.category}</h3>}<details class="learning-material-group" open={groupIndex === 0}><summary class="learning-material-summary"><span class="min-w-0"><span class="learning-material-index">{String(groupIndex + 1).padStart(2, '0')}</span><span class="learning-material-group-title">{group.title}</span>{group.description && <span class="learning-material-group-description">{group.description}</span>}</span><span class="learning-material-count">{items.length} {items.length === 1 ? 'materiál' : items.length < 5 ? 'materiály' : 'materiálů'}</span></summary><div class="learning-material-body">{items.length > 0 ? <ul class="learning-material-list">{items.map((item) => <li>{item.kind === 'document' ? <AttachmentLink label={item.label} url={item.url} description={item.description} class="learning-material-link"><span class="learning-material-filetype" aria-hidden="true">PDF</span><span class="min-w-0"><strong>{item.label}</strong>{item.description && <small>{item.description}</small>}</span></AttachmentLink> : <a href={withBase(item.url)} target={item.url.startsWith('http') ? '_blank' : undefined} rel={item.url.startsWith('http') ? 'noopener' : undefined} class="learning-material-link"><span class="learning-material-filetype learning-material-filetype-external" aria-hidden="true">↗</span><span class="min-w-0"><strong>{item.label}</strong>{item.description && <small>{item.description}</small>}</span></a>}</li>)}</ul> : <p class="learning-material-empty">Materiály budou doplněny.</p>}</div></details></div>; })}</div></section>;
+    if (block.type === 'faq') return <section class="my-10"><p class="section-label">Praktické informace</p><h2 class="mt-3">Časté otázky</h2><div class="mt-4 divide-y divide-ink/15 overflow-hidden rounded-2xl border border-ink/15 bg-white shadow-soft">{block.items.map((item) => <details class="p-5"><summary class="cursor-pointer font-bold">{item.question}</summary><p class="mt-3 whitespace-pre-line leading-7">{item.answer}</p></details>)}</div></section>;
+    return null;
+  })
+}

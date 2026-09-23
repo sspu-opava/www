@@ -1,0 +1,8 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import ArticlePreview from './news/ArticlePreview.astro';
+interface Props { article: CollectionEntry<'articles'>; featured?: boolean; variant?: 'default' | 'homepage' }
+const { article, featured = false, variant = 'default' } = Astro.props;
+const previewVariant = variant === 'homepage' ? 'homepage' : featured ? 'featured' : 'default';
+---
+<ArticlePreview article={article} variant={previewVariant} />

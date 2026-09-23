@@ -1,0 +1,88 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ContentRenderer from '../../../components/content/ContentRenderer.astro';
+import PageHero from '../../../components/content/PageHero.astro';
+import { entries, withBase } from '../../../lib/content';
+import { heroImages } from '../../../data/heroImages';
+
+export async function getStaticPaths() {
+  const pageIds = new Set([
+    'prijimaci-rizeni-technicke-obory',
+    'prijimaci-rizeni-umelecke-obory',
+    'spp'
+  ]);
+  return (await entries('pages'))
+    .filter((page) => pageIds.has(page.id))
+    .map((page) => ({ params: { slug: page.id }, props: { page } }));
+}
+
+const { page } = Astro.props;
+const { Content } = await render(page);
+const accents: Record<string, string> = {
+  'prijimaci-rizeni-technicke-obory': '#59BDDC',
+  'prijimaci-rizeni-umelecke-obory': '#C42079',
+  spp: '#D0D543'
+};
+const heroIcons: Record<string, string> = {
+  'prijimaci-rizeni-technicke-obory': heroImages.admissions,
+  'prijimaci-rizeni-umelecke-obory': heroImages.admissions,
+  spp: heroImages.students
+};
+const sidebars: Record<string, { eyebrow: string; title: string; text: string; links: { label: string; href: string }[] }> = {
+  'prijimaci-rizeni-technicke-obory': {
+    eyebrow: 'Pro uchazeče',
+    title: 'Technické obory',
+    text: 'Strojírenství a informační technologie propojují matematiku, logiku, konstrukci, sítě i programování.',
+    links: [
+      { label: 'Všechny studijní obory', href: '/obory/' },
+      { label: 'Přehled pro uchazeče', href: '/uchazeci/' }
+    ]
+  },
+  'prijimaci-rizeni-umelecke-obory': {
+    eyebrow: 'Pro uchazeče',
+    title: 'Umělecké obory',
+    text: 'Talentová zkouška je vstupem k tvorbě, designu, práci s materiálem i vizuální komunikaci.',
+    links: [
+      { label: 'Všechny studijní obory', href: '/obory/' },
+      { label: 'Přehled pro uchazeče', href: '/uchazeci/' }
+    ]
+  },
+  spp: {
+    eyebrow: 'Podpora ve škole',
+    title: 'Nejste na to sami',
+    text: 'Školní poradenské pracoviště pomáhá žákům, rodičům i učitelům řešit studijní, výchovné a kariérové otázky.',
+    links: [
+      { label: 'Lidé a kontakty', href: '/kontakt/' },
+      { label: 'Pro studenty a rodiče', href: '/studenti/' }
+    ]
+  }
+};
+const sidebar = sidebars[page.id];
+---
+
+<BaseLayout
+  title={page.data.title}
+  description={page.data.description}
+  seo={page.data.seo}
+  breadcrumbs={[{ label: 'Uchazeči', href: '/uchazeci/' }, { label: page.data.title }]}
+  schema={{ '@context': 'https://schema.org', '@type': 'WebPage', name: page.data.title, description: page.data.description }}
+>
+  <PageHero eyebrow={page.data.eyebrow ?? 'Studium'} title={page.data.title} description={page.data.highlight} accent={accents[page.id] ?? '#59BDDC'} icon={heroIcons[page.id]} iconBackground="#001731" />
+  <section class="admission-page container-page pb-14 sm:pb-20" data-pagefind-body>
+    <span class="sr-only" data-pagefind-filter="typ">Studium</span>
+    <div class="admission-layout mt-8 sm:mt-12">
+      <aside class="admission-sidebar">
+        <p class="eyebrow">{sidebar.eyebrow}</p>
+        <h2 class="mt-3 text-2xl">{sidebar.title}</h2>
+        <p class="mt-4 text-sm leading-7 text-ink/75">{sidebar.text}</p>
+        <nav class="mt-6 grid gap-2" aria-label="Související odkazy">
+          {sidebar.links.map((link) => <a class="admission-sidebar-link" href={withBase(link.href)}>{link.label}<span aria-hidden="true">↗</span></a>)}
+        </nav>
+      </aside>
+      <div class="admission-content">
+        <ContentRenderer blocks={page.data.contentBlocks}><Content /></ContentRenderer>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

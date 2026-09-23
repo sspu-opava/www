@@ -1,0 +1,191 @@
+---
+import AccordionList from './AccordionList.astro';
+import { withBase } from '../../lib/content';
+
+interface Visual {
+  src: string;
+  alt?: string;
+}
+
+interface ItemCopy {
+  title: string;
+  text: string;
+}
+
+interface Props {
+  accent: string;
+  careers: string[];
+  description: string;
+  programId: string;
+  programTitle: string;
+  visuals: Visual[];
+}
+
+const { accent, careers, description, programId, programTitle, visuals } = Astro.props as Props;
+
+const introTitles: Record<string, string> = {
+  strojirenstvi: 'Technika, která mění svět',
+  'prumyslovy-design': 'Design, který spojuje krásu a funkci',
+  'graficky-design': 'Obraz, který komunikuje',
+  'design-hracek': 'Tvorba, která probouzí fantazii'
+};
+
+const studyCopies: Record<string, ItemCopy[]> = {
+  strojirenstvi: [
+    { title: 'Adaptační pobyt', text: 'Nové třídy se hned v prvních zářijových dnech poznávají na adaptačním kurzu a budují tým, který je bude provázet celým studiem.' },
+    { title: 'Odborná výuka', text: 'Studenti navrhují stroje a jejich součásti, kreslí technické výkresy, počítají zatížení a učí se volit vhodné technologické postupy.' },
+    { title: 'Dílny a CNC technologie', text: 'Ve školních dílnách si osvojí ruční i strojní zpracování kovů a nekovových materiálů a pracují s CNC stroji, CAD/CAM softwarem i 3D tiskem.' },
+    { title: 'Odborná praxe', text: 'Díky spolupráci školy s regionálními zaměstnavateli řeší studenti reálné úkoly a poznávají prostředí strojírenských firem.' },
+    { title: 'Samostatné projekty', text: 'V závěrečných projektech propojují konstrukční návrh, technologii výroby, měření a prezentaci výsledného řešení.' },
+    { title: 'Maturity', text: 'Maturitní zkouška uzavírá odbornou přípravu a otevírá cestu k technickým profesím i dalšímu studiu na vyšších odborných a vysokých školách.' }
+  ],
+  'prumyslovy-design': [
+    { title: 'Ateliérová tvorba', text: 'Studenti rozvíjejí tvůrčí myšlení, kresebný projev a schopnost hledat vlastní řešení pro každodenní výrobky a předměty.' },
+    { title: 'Kresba a malba', text: 'Věnují se věcným studiím, stylizaci, abstrakci, kompozici i zobrazení lidské figury a získávají pevný výtvarný základ.' },
+    { title: 'Modelování', text: 'Výtvarné návrhy převádějí do prostorových modelů a učí se přemýšlet o tvaru, ergonomii, funkci i uživatelském zážitku.' },
+    { title: 'Materiály a technologie', text: 'Poznávají tradiční i nové materiály, nástroje a technologické postupy a hledají jejich vhodné kombinace pro konkrétní výrobek.' },
+    { title: 'Projekty s klienty', text: 'V reálných zadáních komunikují s klienty, obhajují své návrhy a učí se proměnit nápad v přesvědčivý koncept.' },
+    { title: 'Maturity', text: 'Studium uzavírá maturitní práce, která prověřuje výtvarné, konstrukční, technologické i prezentační dovednosti.' }
+  ],
+  'graficky-design': [
+    { title: 'Ateliérová práce', text: 'Studenti se učí formulovat myšlenku, zvolit vhodný vizuální jazyk a vytvořit výstup, který funguje v tisku i na obrazovce.' },
+    { title: 'Kresba a ilustrace', text: 'Rozvíjejí pozorování, práci s figurou, kompozicí i osobitým rukopisem, který mohou uplatnit v ilustraci a vizuální komunikaci.' },
+    { title: 'Písmo a typografie', text: 'Poznávají stavbu písma, typografická pravidla a práci s textem jako významovou i obrazovou součástí návrhu.' },
+    { title: 'Klasické grafické techniky', text: 'Vyzkoušejí si tradiční grafické postupy, jejich výrazové možnosti a způsoby, jak je kombinovat s digitální tvorbou.' },
+    { title: 'Digitální média', text: 'Pracují s fotografií, grafickými programy, obalovou grafikou, marketingovými materiály a návrhy vizuálních kampaní.' },
+    { title: 'Portfolio a výstavy', text: 'Své projekty kompletují do portfolia, prezentují je veřejně a získávají zkušenost s obhajobou vlastní tvorby.' }
+  ],
+  'design-hracek': [
+    { title: 'Ateliérová tvorba', text: 'Obor rozvíjí hravost, empatii a cit pro příběh. Studenti hledají nové přístupy k hračce, hře a hernímu objektu.' },
+    { title: 'Kresba a malba', text: 'Tvoří věcné studie, zkoušejí stylizaci, abstrakci a kompozici a budují si výtvarný základ pro návrh vlastních postav i předmětů.' },
+    { title: 'Modelování a sádrování', text: 'Nápady převádějí do prostoru, vytvářejí modely a prototypy a ověřují, jak předmět funguje, komu slouží a jak se používá.' },
+    { title: 'Dřevo, textil a další materiály', text: 'Poznávají tradiční i současné materiály, jejich vlastnosti a technologie zpracování včetně dřevoobrábění a šití.' },
+    { title: 'Hra a příběh', text: 'Navrhují herní principy a prostředí s ohledem na věkovou skupinu, bezpečnost, funkci a emocionální působení.' },
+    { title: 'Autorské projekty', text: 'Pracují na reálných zadáních, navazují kontakty s partnery a učí se své návrhy fotografovat, prezentovat a obhájit.' }
+  ]
+};
+
+const subjectCopies: Record<string, ItemCopy[]> = {
+  strojirenstvi: [
+    { title: 'Konstrukce a technické kreslení', text: 'Naučíte se navrhovat součásti a stroje, číst technickou dokumentaci a vytvářet přesné technické výkresy v CAD programech.' },
+    { title: 'Technologie a výroba', text: 'Poznáte výrobní postupy, nástroje a materiály a naučíte se plánovat výrobu s ohledem na kvalitu, čas a náklady.' },
+    { title: 'CAD/CAM a CNC', text: 'Budete pracovat s Autodesk Inventorem, AutoCADem, CAM programy a principy řízení CNC obráběcích strojů.' },
+    { title: 'Měření a kontrola', text: 'Osvojíte si měření technických veličin, kontrolu rozměrů a základní zkoušení materiálů v návaznosti na výrobní proces.' },
+    { title: 'Elektrotechnika a automatizace', text: 'Získáte základy elektrotechniky, elektroniky, PLC řízení a automatizovaných výrobních procesů.' },
+    { title: 'Mechatronika a robotika', text: 'Propojíte mechaniku, elektroniku a řízení při práci s robotickými rameny, pneumatickými obvody a moderními výrobními technologiemi.' }
+  ],
+  'prumyslovy-design': [
+    { title: 'Kresba a výtvarná tvorba', text: 'Budete kreslit, malovat, modelovat a rozvíjet cit pro proporci, kompozici, stylizaci i zobrazení skutečnosti.' },
+    { title: 'Modelování a prototyp', text: 'Naučíte se převést návrh do prostorového modelu a ověřit jeho tvar, ergonomii, funkci a konstrukční řešení.' },
+    { title: 'Materiály a technologie', text: 'Poznáte vlastnosti materiálů, možnosti jejich opracování a technologické postupy důležité pro výrobu modelů i sériových produktů.' },
+    { title: '3D modelování a vizualizace', text: 'Moderní digitální nástroje využijete pro tvorbu 3D modelů, vizualizací, technických podkladů a prezentačních materiálů.' },
+    { title: 'Technické kreslení', text: 'Výtvarný návrh převedete do technických výkresů, perspektivy a dokumentace srozumitelné pro další spolupráci.' },
+    { title: 'Dějiny výtvarné kultury', text: 'Získáte kontext pro vlastní tvorbu a budete se orientovat ve vývoji umění, designu a vizuální kultury.' }
+  ],
+  'graficky-design': [
+    { title: 'Písmo a typografie', text: 'Naučíte se volit a kombinovat písmo, pracovat s hierarchií textu a vytvářet čitelné i výrazné kompozice.' },
+    { title: 'Klasické grafické techniky', text: 'Poznáte tradiční grafické techniky a jejich výrazové možnosti od prvního návrhu po výsledný tisk.' },
+    { title: 'Fotografie', text: 'Budete pracovat s obrazem, světlem, kompozicí a fotografií jako samostatným výtvarným i komunikačním prostředkem.' },
+    { title: 'Digitální grafika', text: 'V grafických programech vytvoříte návrhy pro tisk, web, sociální média, obalovou grafiku i marketingové materiály.' },
+    { title: 'Ilustrace', text: 'Rozvinete vlastní obrazový jazyk a naučíte se pomocí ilustrace vyprávět příběh, vysvětlovat téma nebo vytvářet atmosféru.' },
+    { title: 'Knižní vazba a předtisk', text: 'Vyzkoušíte si knižní vazbu, přípravu tiskových dat a celý proces od nápadu až k fyzickému výtisku.' }
+  ],
+  'design-hracek': [
+    { title: 'Navrhování hraček a her', text: 'Budete navrhovat hračky, herní objekty a prostředí s ohledem na funkci, věk uživatele, bezpečnost a příběh.' },
+    { title: 'Kresba a kompozice', text: 'Naučíte se kresbou zachytit tvar, charakter a pohyb a rozvíjet vlastní výtvarný rukopis.' },
+    { title: 'Modelování a prototypování', text: 'Získáte jistotu v prostorové tvorbě, sádrování a výrobě modelů, které ověřují vaše návrhy v reálném měřítku.' },
+    { title: 'Dřevo, textil a materiály', text: 'Poznáte dřevo, textil i další materiály a vyzkoušíte si jejich zpracování včetně šití a dřevoobrábění.' },
+    { title: 'Fotografie a digitální nástroje', text: 'Své práce se naučíte dokumentovat, upravovat a prezentovat pomocí fotografie i speciálního počítačového vybavení.' },
+    { title: 'Dějiny výtvarné kultury', text: 'Porozumíte vývoji umění, designu a hračky a získáte inspiraci pro vlastní autorskou tvorbu.' }
+  ]
+};
+
+const classroomCopies: Record<string, [ItemCopy, ItemCopy]> = {
+  strojirenstvi: [
+    { title: 'Počítačové učebny a CAD/CAM', text: 'K dispozici jsou počítačové učebny s AutoCADem, Autodesk Inventorem a CAM programy pro konstrukci, simulaci a přípravu výroby.' },
+    { title: 'Dílny, CNC a laboratoře', text: 'Ve školních dílnách a laboratořích studenti pracují s CNC stroji, měřicí technikou, 3D tiskem, elektrotechnickými pomůckami a robotikou.' }
+  ],
+  'prumyslovy-design': [
+    { title: 'Ateliéry a modelárny', text: 'Výuka probíhá v ateliérech a dílnách, kde mají studenti prostor pro kresbu, malbu, modelování a tvorbu prototypů.' },
+    { title: 'Materiály a digitální nástroje', text: 'K tradičním postupům se přidává 3D tisk, digitální modelování, počítačová vizualizace a vybavení pro fotografickou prezentaci práce.' }
+  ],
+  'graficky-design': [
+    { title: 'Grafický ateliér', text: 'Studenti pracují v ateliéru s kreslířskými a grafickými pomůckami, světlem, fotografickou technikou a prostorem pro prezentaci prací.' },
+    { title: 'Digitální tvorba a tisk', text: 'Počítačové učebny nabízejí software pro sazbu, obrazovou úpravu, ilustraci, předtiskovou přípravu i tvorbu digitálních médií.' }
+  ],
+  'design-hracek': [
+    { title: 'Ateliér a řemeslné dílny', text: 'V ateliérech a dílnách studenti kreslí, modelují, pracují se dřevem, textilem, sádrou i dalšími materiály a ověřují své prototypy.' },
+    { title: 'Fotografie a digitální vybavení', text: 'Součástí výuky je také fotografování, digitální zpracování návrhů a tvorba prezentačních materiálů pro autorské projekty.' }
+  ]
+};
+
+const fallbackStudy = [
+  { title: 'Ateliérová práce', text: 'Během studia budete rozvíjet vlastní nápady, praktické dovednosti a schopnost dotáhnout projekt od návrhu k výsledku.' },
+  { title: 'Odborné projekty', text: 'Na praktických zadáních si vyzkoušíte plánování práce, spolupráci i prezentaci výsledného řešení.' },
+  { title: 'Maturitní práce', text: 'Studium uzavřete samostatným projektem, ve kterém propojíte odborné znalosti a vlastní tvůrčí přístup.' }
+];
+const fallbackSubjects = [
+  { title: 'Odborné základy', text: 'Získáte pevný základ pro další odbornou práci v oboru a naučíte se používat vhodné nástroje a postupy.' },
+  { title: 'Materiály a technologie', text: 'Poznáte vlastnosti materiálů, možnosti jejich zpracování a jejich vliv na výsledné řešení.' },
+  { title: 'Prezentace a portfolio', text: 'Naučíte se své nápady srozumitelně představit, obhájit a připravit pro další studium nebo praxi.' }
+];
+
+function addVisuals(items: ItemCopy[]) {
+  return items.map((item, index) => {
+    const visual = visuals[index % visuals.length];
+    return { ...item, image: visual?.src ?? '', alt: visual?.alt || `${item.title} – ${programTitle}` };
+  });
+}
+
+const studyItems = addVisuals(studyCopies[programId] ?? fallbackStudy);
+const subjectItems = addVisuals(subjectCopies[programId] ?? fallbackSubjects);
+const classroomItems = classroomCopies[programId] ?? [
+  { title: 'Odborné učebny', text: 'Výuka probíhá ve specializovaných učebnách vybavených pro praktickou práci v oboru.' },
+  { title: 'Vybavení pro projekty', text: 'Studenti využívají techniku a materiály, které jim umožní proměnit návrhy v konkrétní výstupy.' }
+];
+const galleryPhotos = visuals.slice(0, 6);
+---
+
+<section id="obor-content" class="container-page pb-14 sm:pb-20" data-pagefind-body>
+
+  <section aria-labelledby="program-why-title">
+    <h2 id="program-why-title" class="text-4xl font-black tracking-tight sm:text-5xl" style={`color: ${accent}`}>Proč studovat {programTitle.toLocaleLowerCase('cs-CZ')}?</h2>
+    <div class="mt-8 grid gap-8 lg:grid-cols-2">
+      <article class="rounded-2xl bg-white p-6 sm:p-8">
+        <h3 class="text-2xl">{introTitles[programId] ?? programTitle}</h3>
+        <p class="mt-4 text-base leading-8 text-ink/85 sm:text-lg">{description}</p>
+        <div class="mt-4 text-base leading-8 text-ink/75"><slot /></div>
+      </article>
+      <article class="rounded-2xl bg-mist p-6 sm:p-8">
+        <h3 class="text-2xl">Možnosti uplatnění v praxi</h3>
+        <ul class="mt-5 space-y-3">
+          {careers.map((career) => <li class="flex gap-3 leading-7"><span class="mt-1 font-bold" style={`color: ${accent}`} aria-hidden="true">✓</span><span>{career}</span></li>)}
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="mt-20" aria-labelledby="program-study-title">
+    <h2 id="program-study-title" class="text-4xl font-black tracking-tight sm:text-5xl" style={`color: ${accent}`}>Jak probíhá studium?</h2>
+    <div class="mt-8 grid gap-10 lg:grid-cols-2">
+      <article class="min-w-0">
+        <h3 class="text-2xl">Co mě čeká?</h3>
+        <div class="mt-5"><AccordionList id={`${programId}-study-accordion`} items={studyItems} /></div>
+      </article>
+      <article class="min-w-0">
+        <h3 class="text-2xl">Co se naučím?</h3>
+        <div class="mt-5"><AccordionList id={`${programId}-subjects-accordion`} items={subjectItems} /></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="mt-20" aria-labelledby="program-classrooms-title">
+    <h2 id="program-classrooms-title" class="text-4xl font-black tracking-tight sm:text-5xl" style={`color: ${accent}`}>Kde se budu učit?</h2>
+    <div class="mt-8 grid gap-10 lg:grid-cols-2">
+      {classroomItems.map((item) => <article><h3 class="text-xl">{item.title}</h3><p class="mt-3 leading-7 text-ink/80">{item.text}</p></article>)}
+    </div>
+    <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
+      {galleryPhotos.map((photo) => <figure class="overflow-hidden rounded-2xl"><img src={withBase(photo.src)} alt={photo.alt || programTitle} class="aspect-[4/3] w-full object-cover transition duration-300 hover:scale-105" loading="lazy" decoding="async" /></figure>)}
+    </div>
+  </section>
+</section>

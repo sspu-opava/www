@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SectionHub from '../../components/content/SectionHub.astro';
+import { sectionHubs } from '../../data/sectionHubs';
+import { entries, formatDate, withBase } from '../../lib/content';
+const hub = sectionHubs.dokumenty;
+const documents = await entries('documents');
+---
+<BaseLayout title={hub.label} description={hub.description} breadcrumbs={[{ label: hub.label }]}>
+  <SectionHub hub={hub} />
+  <section class="container-page pb-16" aria-labelledby="documents-heading">
+    <h2 id="documents-heading">Dokumenty ke stažení</h2>
+    <div class="mt-6 grid gap-4 md:grid-cols-2">{documents.map(document => <article class="card p-6"><p class="text-sm">{document.data.category} · {formatDate(document.data.date)}</p><h3 class="mt-3 text-xl"><a href={withBase(`/dokumenty/${document.id}/`)}>{document.data.title}</a></h3><p class="mt-3 leading-7">{document.data.description}</p></article>)}</div>
+    {documents.length === 0 && <p class="mt-4">Dokumenty připravujeme.</p>}
+  </section>
+</BaseLayout>

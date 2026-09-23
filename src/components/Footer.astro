@@ -1,0 +1,69 @@
+---
+import { withBase } from '../lib/content';
+---
+<footer data-pagefind-ignore class="mt-12 overflow-hidden bg-night text-white sm:mt-16">
+  <div class="grid h-1.5 grid-cols-5" aria-hidden="true"><span class="bg-school-steel"></span><span class="bg-school-cyan"></span><span class="bg-school-coral"></span><span class="bg-school-lime"></span><span class="bg-school-magenta"></span></div>
+  <div class="py-10 sm:py-12">
+    <div class="container-page">
+      <div class="grid gap-10 md:grid-cols-[.9fr_1.35fr_1fr]">
+        <section aria-labelledby="footer-founder">
+          <h2 id="footer-founder" class="border-b border-white/20 pb-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/60">Zřizovatel</h2>
+          <div class="mt-5 space-y-5">
+            <img src={withBase('/images/kraj-logo-cb.png')} alt="Moravskoslezský kraj" class="block h-auto w-56 max-w-full brightness-0 invert opacity-80" loading="lazy" />
+            <img src={withBase('/images/prispevkova-organizace-cb.png')} alt="Příspěvková organizace Moravskoslezského kraje" class="block h-auto w-56 max-w-full brightness-0 invert opacity-80" loading="lazy" />
+          </div>
+          <p class="mt-5 max-w-xs text-sm leading-6 text-white/70">Střední škola průmyslová a umělecká Opava je příspěvkovou organizací zřizovanou Moravskoslezským krajem.</p>
+        </section>
+
+        <section aria-labelledby="footer-contact">
+          <h2 id="footer-contact" class="border-b border-white/20 pb-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/60">Kontaktní údaje</h2>
+          <p class="mt-5 font-semibold text-white">Střední škola průmyslová a umělecká, Opava</p>
+          <address class="mt-3 not-italic text-sm leading-6 text-white/75">Praskova 399/8<br />746 01 Opava</address>
+          <dl class="mt-4 space-y-2 text-sm text-white/75">
+            <div><dt class="sr-only">Telefon</dt><dd><a href="tel:+420553621580" class="hover:text-accent">+420 553 621 580</a></dd></div>
+            <div><dt class="sr-only">E-mail</dt><dd><a href="mailto:sspu@sspu-opava.cz" class="hover:text-accent">sspu@sspu-opava.cz</a></dd></div>
+            <div><dt class="sr-only">Web</dt><dd><a href={withBase('/')} class="hover:text-accent">www.sspu-opava.cz</a></dd></div>
+          </dl>
+          <p class="mt-5 text-xs leading-5 text-white/55">IČ: 47813121 · IZO: 000601896<br />RED-IZO: 600017338</p>
+        </section>
+
+        <section aria-labelledby="footer-useful-links">
+          <h2 id="footer-useful-links" class="border-b border-white/20 pb-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/60">Užitečné odkazy</h2>
+          <ul class="mt-5 space-y-2 text-sm text-white/75">
+            <li><a href="https://portal.skolaonline.cz/" target="_blank" rel="noreferrer" class="hover:text-accent">Škola Online <span aria-hidden="true">↗</span></a></li>
+            <li><a href="https://moodle.sspu-opava.cz/" target="_blank" rel="noreferrer" class="hover:text-accent">Moodle <span aria-hidden="true">↗</span></a></li>
+            <li><a href="https://portal.office.com/" target="_blank" rel="noreferrer" class="hover:text-accent">Office 365 <span aria-hidden="true">↗</span></a></li>
+            <li><a href={withBase('/uchazeci/')} class="hover:text-accent">Přijímací řízení</a></li>
+            <li><a href={withBase('/dokumenty/')} class="hover:text-accent">Dokumenty</a></li>
+            <li><a href={withBase('/cs/dokumenty/prohlaseni-o-pristupnosti-webu/')} target="_blank" rel="noopener" class="hover:text-accent">Prohlášení o přístupnosti <span aria-hidden="true">↗</span></a></li>
+          </ul>
+        </section>
+      </div>
+
+      <section class="mt-10 border-t border-white/15 pt-7" aria-labelledby="footer-partners">
+        <h2 id="footer-partners" class="border-b border-white/20 pb-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/60">Partneři a sponzoři</h2>
+        <div class="mt-5 grid gap-x-8 gap-y-2 text-sm text-white/70 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <a href="https://www.ostroj.cz/cs/" target="_blank" rel="noreferrer" class="hover:text-accent">OSTROJ</a>
+          <a href="https://www.prestar.cz/" target="_blank" rel="noreferrer" class="hover:text-accent">Prestar</a>
+          <a href="https://www.opall-agri.cz/" target="_blank" rel="noreferrer" class="hover:text-accent">Opall-Agri</a>
+          <a href="https://www.opavanet.cz/" target="_blank" rel="noreferrer" class="hover:text-accent">OpavaNet</a>
+          <a href="https://www.lanex.cz/" target="_blank" rel="noreferrer" class="hover:text-accent">LANEX</a>
+          <a href="https://www.remante.com/" target="_blank" rel="noreferrer" class="hover:text-accent">Remante</a>
+          <a href="https://www.witzenmann.cz/" target="_blank" rel="noreferrer" class="hover:text-accent">Witzenmann</a>
+          <a href="https://www.haberkorn.cz/" target="_blank" rel="noreferrer" class="hover:text-accent">Haberkorn</a>
+          <a href="https://www.optys.cz/" target="_blank" rel="noreferrer" class="hover:text-accent">OPTYS</a>
+          <a href="https://www.tema.cz/" target="_blank" rel="noreferrer" class="hover:text-accent">TEMA</a>
+          <a href="https://www.mondelezinternational.com/" target="_blank" rel="noreferrer" class="hover:text-accent">Mondelez</a>
+          <a href="https://www.edosolutions.cz/" target="_blank" rel="noreferrer" class="hover:text-accent">EDO Solutions</a>
+          <a href="https://www.hon-kovo.cz/" target="_blank" rel="noreferrer" class="hover:text-accent">HON</a>
+          <a href="https://www.komas.cz/" target="_blank" rel="noreferrer" class="hover:text-accent">KOMAS</a>
+          <a href="https://www.hagemann.cz/" target="_blank" rel="noreferrer" class="hover:text-accent">Hagemann</a>
+          <a href="https://www.labortech.cz/" target="_blank" rel="noreferrer" class="hover:text-accent">LaborTech</a>
+          <a href="https://www.hansenelectric.cz/" target="_blank" rel="noreferrer" class="hover:text-accent">Hansen Electric</a>
+        </div>
+      </section>
+
+      <div class="mt-8 border-t border-white/15 pt-5 text-xs text-white/50">© {new Date().getFullYear()} SŠPU Opava · Prototyp obsahu v Gitu</div>
+    </div>
+  </div>
+</footer>

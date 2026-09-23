@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/content/PageHero.astro';
+import { entries } from '../../lib/content';
+import { heroImages } from '../../data/heroImages';
+import PeopleSection from '../../components/people/PeopleSection.astro';
+import SchoolContact from '../../components/people/SchoolContact.astro';
+const people = await entries('people');
+const teachers = people
+  .filter((person) => person.id !== 'monika-zurkova')
+  .sort((a, b) => {
+    const sortKey = (name: string) => {
+      const parts = name.trim().split(/\s+/);
+      const surname = parts.pop() ?? '';
+      return { surname, givenName: parts.join(' ') };
+    };
+    const left = sortKey(a.data.name);
+    const right = sortKey(b.data.name);
+    return left.surname.localeCompare(right.surname, 'cs') || left.givenName.localeCompare(right.givenName, 'cs');
+  });
+---
+<BaseLayout title="Lidé a kontakty" description="Oficiální kontaktní údaje, adresy školních budov, úřední hodiny a kontakty na zaměstnance SŠPU Opava.">
+  <PageHero eyebrow="Škola" title="Lidé a kontakty" description="Kontaktní údaje školy, adresy budov, úřední hodiny a kontakty na zaměstnance SŠPU Opava." accent="#59BDDC" icon={heroImages.contacts} iconBackground="#001731" />
+  <div data-pagefind-body>
+    <span class="sr-only" data-pagefind-filter="typ">Kontakty</span>
+    <SchoolContact />
+    <section class="container-page contact-people" aria-label="Kontakty na zaměstnance školy">
+      <PeopleSection people={people} groups={["vedeni"]} title="Vedení školy" variant="compact" showPhoto showPhone showWorkplace={false} includeDialogs />
+      <PeopleSection people={people} groups={["kolegium"]} title="Kolegium ředitele školy" variant="compact" showPhoto showPhone showWorkplace={false} includeDialogs class="mt-10 sm:mt-12" />
+      <PeopleSection people={people} groups={["administrativa"]} title="Administrativa školy" variant="compact" showPhoto showPhone showWorkplace={false} includeDialogs class="mt-10 sm:mt-12" />
+      <PeopleSection people={teachers} groups={["ucitele"]} title="Učitelé" variant="compact" showPhoto showPhone showWorkplace={false} includeDialogs class="mt-10 sm:mt-12" />
+    </section>
+  </div>
+</BaseLayout>

@@ -1,0 +1,35 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { withBase } from '../../lib/content';
+import ArticlePreview from './ArticlePreview.astro';
+
+interface Props {
+  articles: CollectionEntry<'articles'>[];
+  eyebrow?: string;
+  title: string;
+  description?: string;
+  href?: string;
+  linkLabel?: string;
+  variant?: 'default' | 'compact' | 'featured' | 'homepage';
+  background?: 'paper' | 'mist';
+  titleStyle?: 'heading' | 'eyebrow';
+}
+
+const { articles, eyebrow, title, description, href, linkLabel = 'Všechny aktuality', variant = 'default', background = 'paper', titleStyle = 'heading' } = Astro.props;
+---
+
+<section class:list={[background === 'mist' ? 'bg-mist py-16 sm:py-20' : 'py-16 sm:py-20']}>
+  <div class="container-page">
+    <div class="flex flex-wrap items-end justify-between gap-5">
+      <div>
+        {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+        {title && (titleStyle === 'eyebrow' ? <h2 class="eyebrow !text-xs !leading-normal">{title}</h2> : <h2 class:list={[eyebrow && 'mt-2']}>{title}</h2>)}
+        {description && <p class="mt-3 max-w-2xl leading-7 text-ink/70">{description}</p>}
+      </div>
+      {href && <a class="button-secondary" href={withBase(href)}>{linkLabel}</a>}
+    </div>
+    {articles.length > 0 && <div class="mt-7 grid gap-6 lg:grid-cols-3">
+      {articles.map((article) => <ArticlePreview article={article} variant={variant} />)}
+    </div>}
+  </div>
+</section>

@@ -1,0 +1,20 @@
+---
+import type { EventEntry } from '../../lib/events';
+import EventDialog from './EventDialog.astro';
+import EventPreview, { type EventPreviewVariant } from './EventPreview.astro';
+
+interface Props {
+  events: EventEntry[];
+  variant?: EventPreviewVariant;
+  emptyMessage?: string;
+  monthFilter?: boolean;
+}
+
+const { events, variant = 'compact', emptyMessage = 'Pro zvolené filtry nejsou naplánovány žádné události.', monthFilter = false } = Astro.props;
+---
+<div id="event-list" class="event-list" data-event-list data-event-list-month-filter={monthFilter ? 'true' : 'false'}>
+  {events.length > 0 ? events.map((event) => <div class="event-list-item" data-event-list-item>
+    <EventPreview event={event} variant={variant} />
+    <EventDialog event={event} />
+  </div>) : <p class="event-list-empty info-panel" data-event-empty>{emptyMessage}</p>}
+</div>

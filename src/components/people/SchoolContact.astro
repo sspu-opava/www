@@ -1,0 +1,88 @@
+---
+import { withBase } from '../../lib/content';
+
+const mainMap = 'https://www.openstreetmap.org/export/embed.html?bbox=17.9035%2C49.9345%2C17.9105%2C49.9390&layer=mapnik&marker=49.9367929%2C17.9070038';
+const workshopMap = 'https://www.openstreetmap.org/export/embed.html?bbox=17.9075%2C49.9305%2C17.9145%2C49.9340&layer=mapnik&marker=49.9320901%2C17.9108501';
+---
+
+<section class="school-contact" aria-labelledby="school-contact-title">
+  <div class="school-contact-intro">
+    <div class="school-contact-brand">
+      <img src={withBase('/images/sspu-logo.png')} alt="SŠPU Opava" />
+      <div>
+        <h2 id="school-contact-title">Střední škola průmyslová a umělecká, Opava</h2>
+        <p class="school-contact-description">Příspěvková organizace zřízená Moravskoslezským krajem.</p>
+      </div>
+    </div>
+    <img class="school-contact-building" src={withBase('/uploads/contact/school-building.webp')} alt="Hlavní budova školy ve Smetanových sadech v sousedství Slezského zemského muzea" loading="lazy" />
+  </div>
+
+  <div class="school-contact-grid">
+    <article class="school-contact-panel">
+      <p class="section-label school-contact-section-label">Identifikační údaje</p>
+      <dl class="school-contact-data">
+        <div><dt>Právní forma</dt><dd>Příspěvková organizace</dd></div>
+        <div><dt>Zřizovatel</dt><dd>Moravskoslezský kraj<br />28. října 117, Ostrava, 702 18<br />IČ: 70890692</dd></div>
+        <div><dt>Identifikační údaje</dt><dd>IČ: 47813121<br />IZO: 000601896<br />RED IZO: 600017338</dd></div>
+        <div><dt>Datová schránka</dt><dd>ID: xc5gfwu<br /><span class="font-normal text-ink/65">právnická osoba</span></dd></div>
+        <div><dt>Elektronická podatelna</dt><dd><a href="mailto:sspu@po-msk.cz">sspu@po-msk.cz</a><br /><span class="font-normal text-ink/65">Maximální velikost zprávy 20 MB.</span></dd></div>
+      </dl>
+    </article>
+
+    <article class="school-contact-panel">
+      <p class="section-label school-contact-section-label">Úřední hodiny</p>
+      <p class="mt-3 text-sm leading-6 text-ink/70">Ředitelství a podatelna školy od září do června příslušného školního roku. Polední přestávka je vždy od 12. do 13. hodiny.</p>
+      <table class="school-hours">
+        <tbody>
+          <tr><th scope="row">Pondělí</th><td>7.45–15.30</td></tr>
+          <tr><th scope="row">Úterý</th><td>7.45–15.00</td></tr>
+          <tr><th scope="row">Středa</th><td>7.45–15.30</td></tr>
+          <tr><th scope="row">Čtvrtek</th><td>7.45–15.00</td></tr>
+          <tr><th scope="row">Pátek</th><td>7.45–14.00</td></tr>
+        </tbody>
+      </table>
+    </article>
+  </div>
+
+  <div class="school-buildings">
+    <div class="school-building-grid">
+      <article class="school-building-card">
+        <div class="school-building-copy">
+          <div>
+            <p class="school-building-type">Hlavní budova školy</p>
+            <h3>Praskova 399/8</h3>
+            <p>746 01 Opava</p>
+          </div>
+          <div class="school-building-contact">
+            <a class="school-contact-link" href="tel:+420553621580">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 3.5 8.8 3a1.5 1.5 0 0 1 1.7.9l1.1 2.7a1.5 1.5 0 0 1-.3 1.6L10 9.5a12.2 12.2 0 0 0 4.5 4.5l1.3-1.3a1.5 1.5 0 0 1 1.6-.3l2.7 1.1a1.5 1.5 0 0 1 .9 1.7l-.5 2.2a1.8 1.8 0 0 1-1.8 1.4C11.2 18.4 5.6 12.8 5.2 5.3a1.8 1.8 0 0 1 1.4-1.8Z" /></svg>
+              <span>+420 553 621 580</span>
+            </a>
+            <a class="school-contact-link" href="mailto:sspu@sspu-opava.cz">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 6.5h17v11h-17v-11Zm0 .5 8.5 6 8.5-6" /></svg>
+              <span>sspu@sspu-opava.cz</span>
+            </a>
+          </div>
+        </div>
+        <iframe class="school-building-map" title="Mapa hlavní budovy školy v Opavě" src={mainMap} loading="lazy"></iframe>
+      </article>
+
+      <article class="school-building-card">
+        <div class="school-building-copy">
+          <div>
+            <p class="school-building-type">Školní dílny</p>
+            <h3>Janská 1849/30</h3>
+            <p>746 01 Opava</p>
+          </div>
+          <div class="school-building-contact">
+            <a class="school-contact-link" href="tel:+420734353923">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 3.5 8.8 3a1.5 1.5 0 0 1 1.7.9l1.1 2.7a1.5 1.5 0 0 1-.3 1.6L10 9.5a12.2 12.2 0 0 0 4.5 4.5l1.3-1.3a1.5 1.5 0 0 1 1.6-.3l2.7 1.1a1.5 1.5 0 0 1 .9 1.7l-.5 2.2a1.8 1.8 0 0 1-1.8 1.4C11.2 18.4 5.6 12.8 5.2 5.3a1.8 1.8 0 0 1 1.4-1.8Z" /></svg>
+              <span>+420 734 353 923</span>
+            </a>
+          </div>
+        </div>
+        <iframe class="school-building-map" title="Mapa školních dílen v Opavě" src={workshopMap} loading="lazy"></iframe>
+      </article>
+    </div>
+  </div>
+</section>

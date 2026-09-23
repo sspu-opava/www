@@ -1,0 +1,45 @@
+---
+import type { EventEntry } from '../../lib/events';
+import { eventTagLabel } from '../../lib/events';
+import { withBase } from '../../lib/content';
+import { getProgramColor } from '../../data/articleVisuals';
+import EventMeta from './EventMeta.astro';
+
+export type EventPreviewVariant = 'calendar' | 'homepage' | 'field' | 'applicants' | 'graduates' | 'compact';
+
+interface Props {
+  event: EventEntry;
+  variant?: EventPreviewVariant;
+}
+
+const { event, variant = 'compact' } = Astro.props;
+const showExcerpt = !['calendar', 'compact'].includes(variant);
+const showLocation = variant !== 'calendar';
+const headingTag = variant === 'homepage' || variant === 'compact' ? 'h3' : 'h2';
+const href = withBase(`/udalosti/${event.id}/`);
+const eventColor = getProgramColor(event.data.programs);
+const isMultiDay = Boolean(event.data.endDate && event.data.endDate !== event.data.startDate);
+---
+<article
+  class:list={["event-preview card", `event-preview-${variant}`, isMultiDay && "event-preview-multi-day"]}
+  data-event-card
+  data-event-id={event.id}
+  data-event-start={event.data.startDate}
+  data-event-end={event.data.endDate ?? event.data.startDate}
+  data-event-tags={event.data.tags.join(',')}
+  data-event-programs={event.data.programs.join(',')}
+  style={`--event-accent:${eventColor}`}
+>
+  <div class="event-preview-date" aria-label={`Datum události: ${event.data.startDate}`}>
+    <span class="event-preview-date-day">{event.data.startDate.slice(8, 10)}</span>
+    <span class="event-preview-date-month">{event.data.startDate.slice(5, 7)} / {event.data.startDate.slice(0, 4)}</span>
+    {isMultiDay && <span class="event-preview-date-range" aria-label="Vícedenní událost">→</span>}
+  </div>
+  <div class="event-preview-main">
+    <p class="event-preview-kicker">{isMultiDay ? 'Vícedenní událost' : 'Událost'}</p>
+    {headingTag === 'h3' ? <h3 class="event-preview-title"><a href={href} data-event-open={event.id}>{event.data.title}</a></h3> : <h2 class="event-preview-title"><a href={href} data-event-open={event.id}>{event.data.title}</a></h2>}
+    {showExcerpt && <p class="event-preview-excerpt">{event.data.excerpt}</p>}
+    <EventMeta event={event} showLocation={showLocation} compact={variant === 'compact'} />
+    {variant === 'calendar' && event.data.tags.length > 0 && <p class="event-preview-calendar-tags" aria-label="Štítky">{event.data.tags.slice(0, 2).map(eventTagLabel).join(' · ')}</p>}
+  </div>
+</article>

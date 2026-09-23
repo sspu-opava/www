@@ -1,0 +1,22 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { relatedArticles } from '../../lib/content';
+import ArticleSection from './ArticleSection.astro';
+
+interface Props {
+  article: CollectionEntry<'articles'>;
+  articles: CollectionEntry<'articles'>[];
+  limit?: number;
+}
+
+const { article, articles, limit = 3 } = Astro.props;
+const related = relatedArticles(article, articles, limit);
+---
+
+{related.length > 0 && <ArticleSection
+  articles={related}
+  title="Mohlo by vás zajímat"
+  variant="compact"
+  background="mist"
+  titleStyle="eyebrow"
+/>}

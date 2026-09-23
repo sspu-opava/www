@@ -1,0 +1,37 @@
+---
+import { entries } from '../lib/content';
+import ContentPage from '../components/content/ContentPage.astro';
+import { aliases, type Alias } from '../data/pageRoutes';
+import AktualityPage from './aktuality/index.astro';
+import EventsPage from './udalosti/index.astro';
+import GalleryPage from './galerie/index.astro';
+import ProgramsPage from './obory/index.astro';
+import ProjectsPage from './cs/projekty/index.astro';
+import JobsPage from './cs/studium/nabidky-zamestnani/index.astro';
+import ContactPage from './kontakt/index.astro';
+import StudentsPage from '../components/students/StudentsPage.astro';
+import ArtGalleryPage from './cs/aktuality/fotogalerie-umeleckych-oboru/index.astro';
+
+
+
+export async function getStaticPaths() {
+  const pages = await entries('pages');
+  return aliases.filter((alias) => !alias.pageId || pages.some((page) => page.id === alias.pageId)).map((alias) => ({
+    params: { slug: alias.slug },
+    props: { alias, page: alias.pageId ? pages.find((item) => item.id === alias.pageId) : undefined }
+  }));
+}
+
+const { alias, page } = Astro.props as { alias: Alias; page?: any };
+---
+{alias.kind === 'aktuality' ? <AktualityPage />
+  : alias.kind === 'events' ? <EventsPage />
+  : alias.kind === 'gallery' ? <GalleryPage />
+  : alias.kind === 'programs' ? <ProgramsPage />
+  : alias.kind === 'projects' ? <ProjectsPage />
+  : alias.kind === 'jobs' ? <JobsPage />
+  : alias.kind === 'contact' ? <ContactPage />
+  : alias.kind === 'students' ? <StudentsPage />
+  : alias.kind === 'artGallery' ? <ArtGalleryPage />
+  : page ? <ContentPage page={page} heroIcon={alias.icon} accent={alias.accent} eyebrow={alias.eyebrow} breadcrumbs={[{ label: alias.eyebrow ?? 'Škola' }]} />
+  : null}

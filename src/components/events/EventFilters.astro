@@ -1,0 +1,58 @@
+---
+import { withBase } from '../../lib/content';
+import { currentMonthKey } from '../../lib/events';
+
+interface TagOption { value: string; label: string }
+interface ProgramOption { id: string; title: string }
+interface Props {
+  tags: readonly TagOption[];
+  programs?: ProgramOption[];
+  selectedTags?: string[];
+  selectedPrograms?: string[];
+  selectedMonth?: string;
+  selectedDay?: string;
+  resultCount?: number;
+}
+
+const { tags, programs = [], selectedTags = [], selectedPrograms = [], selectedMonth = currentMonthKey(), selectedDay = '', resultCount = 0 } = Astro.props;
+const urlFor = (removeTag?: string, removeProgram?: string, removeDay = false) => {
+  const params = new URLSearchParams();
+  const remaining = selectedTags.filter((tag) => tag !== removeTag);
+  const remainingPrograms = selectedPrograms.filter((program) => program !== removeProgram);
+  if (remaining.length > 0) params.set('stitky', remaining.join(','));
+  if (remainingPrograms.length > 0) params.set('obor', remainingPrograms.join(','));
+  if (selectedMonth) params.set('mesic', selectedMonth);
+  if (selectedDay && !removeDay) params.set('den', selectedDay);
+  const query = params.toString();
+  return withBase(`/udalosti/${query ? `?${query}` : ''}`);
+};
+---
+<section class="event-filters event-filters-inline" data-event-filters data-event-filter-options={JSON.stringify([...tags.map((tag) => ({ kind: 'tag', value: tag.value, label: tag.label })), ...programs.map((program) => ({ kind: 'program', value: program.id, label: program.title }))])} aria-labelledby="event-filters-title">
+  <div class="event-filter-toolbar">
+    <div class="event-filter-heading">
+      <p class="eyebrow">Filtry</p>
+      <h2 id="event-filters-title" class="sr-only">Filtry událostí</h2>
+      <span class="event-filter-count" data-event-result-count>{resultCount}</span>
+    </div>
+    <form class="event-filter-form" method="get" action={withBase('/udalosti/')} data-event-filter-form>
+    <input type="hidden" name="mesic" value={selectedMonth} data-event-month-input />
+    {selectedDay && <input type="hidden" name="den" value={selectedDay} data-event-day-input />}
+      <label class="sr-only" for="event-filter-input">Přidat štítek nebo obor</label>
+      <input id="event-filter-input" class="event-filter-input" type="search" name="filtr" placeholder="Přidat štítek nebo obor…" autocomplete="off" list="event-filter-options" data-event-filter-input />
+      <datalist id="event-filter-options">
+        {tags.map((tag) => <option value={tag.label} />)}
+        {programs.map((program) => <option value={program.title} />)}
+      </datalist>
+      <button class="sr-only" type="submit">Přidat filtr</button>
+    </form>
+    <a class="event-filter-clear" data-event-clear-filters hidden href={withBase('/udalosti/')}>Zrušit vše</a>
+  </div>
+  <div class="event-active-filters" data-event-active-filters hidden={!(selectedTags.length > 0 || selectedPrograms.length > 0 || selectedDay)} aria-label="Aktivní filtry">
+    {(selectedTags.length > 0 || selectedPrograms.length > 0 || selectedDay) && <>
+      <span class="event-active-filters-label">Aktivní:</span>
+      {selectedTags.map((tag) => <a class="event-active-filter" href={urlFor(tag)}>{tags.find((item) => item.value === tag)?.label ?? tag} <span aria-hidden="true">×</span></a>)}
+      {selectedPrograms.map((program) => <a class="event-active-filter" href={urlFor(undefined, program)}>{programs.find((item) => item.id === program)?.title ?? program} <span aria-hidden="true">×</span></a>)}
+      {selectedDay && <a class="event-active-filter" href={urlFor(undefined, undefined, true)}>{selectedDay} <span aria-hidden="true">×</span></a>}
+    </>}
+  </div>
+</section>
