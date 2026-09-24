@@ -23,7 +23,7 @@ seo:
   description: "Pro žáky třetího a čtvrtého ročníku oboru tvorba hraček a herních
     předmětů je již neodmyslitelně spjat s pobytem v přírodě. "
   noindex: false
-gallery: land-art-ve-svobodnych-hermanicich-1-galerie.md
+gallery: fotogalerie-land-art-2026.md
 related:
   - vernisaz-vystavy-hravek.md
   - vernisaz-ve-slezskem-divadle-v-opave.md
